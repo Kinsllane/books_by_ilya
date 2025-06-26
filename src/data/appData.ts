@@ -1,6 +1,6 @@
 // src/data/appData.ts
 
-import { v4 as generateUniqueId } from 'uuid'; // Используем uuid для генерации уникальных ID
+import { v4 as generateUniqueId } from 'uuid';
 import type { BookEntry, UserProfile, BookReview, BookQuote, BookTrade } from '../types/appTypes';
 
 // --- Имитация базы данных (хранение в памяти) ---
@@ -111,10 +111,10 @@ export const findUserById = (userId: string | undefined): UserProfile | undefine
  * @returns {UserProfile} Созданный профиль пользователя.
  */
 export const registerNewUser = (username: string, password_raw: string): UserProfile => {
-    const newUser: UserProfile = { 
-        id: `usr-${generateUniqueId()}`, 
-        name: username, 
-        password: password_raw, 
+    const newUser: UserProfile = {
+        id: `usr-${generateUniqueId()}`,
+        name: username,
+        password: password_raw,
         balance: 500, // Начальный баланс
         registrationDate: new Date().toISOString().split('T')[0] // Текущая дата
     };
@@ -171,9 +171,42 @@ export const addNewBook = (bookDetails: Omit<BookEntry, 'id' | 'currentOwner' | 
         quotes: [],
     };
     // Добавляем новую книгу в начало массива, чтобы она сразу была видна
-    availableBooks = [newBook, ...availableBooks]; 
+    availableBooks = [newBook, ...availableBooks];
     return newBook;
 };
+
+/**
+ * @function deleteBook
+ * @description Удаляет книгу из каталога.
+ * @param {string} bookId - ID книги для удаления.
+ * @param {string} userId - ID пользователя, пытающегося удалить книгу (для проверки прав).
+ * @returns {{ success: boolean, message: string }} Результат операции.
+ */
+export const deleteBook = (bookId: string, userId: string): { success: boolean, message: string } => {
+    const bookIndex = availableBooks.findIndex(book => book.id === bookId);
+
+    if (bookIndex === -1) {
+        return { success: false, message: "Книга не найдена." };
+    }
+
+    const bookToDelete = availableBooks[bookIndex];
+
+    // Проверяем, является ли пользователь владельцем книги
+    if (bookToDelete.currentOwner.id !== userId) {
+        return { success: false, message: "У вас нет прав для удаления этой книги." };
+    }
+
+    // Удаляем книгу из массива
+    availableBooks.splice(bookIndex, 1);
+
+    // Также удаляем все активные предложения обмена, связанные с этой книгой
+    activeTrades = activeTrades.filter(trade =>
+        trade.initiatorBook.id !== bookId && trade.recipientBook.id !== bookId
+    );
+
+    return { success: true, message: "Книга успешно удалена." };
+};
+
 
 /**
  * @function addReviewToBook
@@ -219,11 +252,11 @@ export const addQuoteToBook = (bookId: string, text: string, quoter: UserProfile
 export const purchaseBook = (bookId: string, buyerId: string): { success: boolean, message: string, book?: BookEntry, buyer?: UserProfile } => {
     const book = retrieveBookById(bookId);
     const buyer = findUserById(buyerId);
-    
+
     if (!book || !buyer || !book.priceValue) {
         return { success: false, message: "Книга или покупатель не найдены, или книга не имеет цены." };
     }
-    
+
     const seller = findUserById(book.currentOwner.id);
 
     if (!seller) {
@@ -274,11 +307,11 @@ export const createNewTradeProposal = (initiatorId: string, initiatorBookId: str
     if (!initiator || !initiatorBook || !recipientBook) {
         return { success: false, message: "Ошибка: Недостаточно данных для создания предложения обмена." };
     }
-    
+
     const recipient = recipientBook.currentOwner;
 
     // Проверка на существование аналогичного предложения
-    const existingTrade = activeTrades.find(t => 
+    const existingTrade = activeTrades.find(t =>
         t.status === 'pending' &&
         ((t.initiator.id === initiator.id && t.initiatorBook.id === initiatorBook.id && t.recipientBook.id === recipientBook.id) ||
          (t.initiator.id === recipient.id && t.initiatorBook.id === recipientBook.id && t.recipientBook.id === initiatorBook.id))
@@ -295,7 +328,7 @@ export const createNewTradeProposal = (initiatorId: string, initiatorBookId: str
         recipient,
         recipientBook,
         status: 'pending'
-        
+
     };
 
     activeTrades.push(newTrade);
@@ -328,7 +361,7 @@ export const respondToTradeProposal = (tradeId: string, response: 'accepted' | '
         initiatorBook.isForTrade = false;
         recipientBook.isForSale = false;
         recipientBook.isForTrade = false;
-        
+
         trade.status = 'accepted';
         return { success: true, message: "Обмен успешно завершен!" };
     } else {

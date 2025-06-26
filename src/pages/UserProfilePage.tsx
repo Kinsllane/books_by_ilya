@@ -8,7 +8,8 @@ import {
     availableBooks,
     activeTrades,
     findUserById,
-    respondToTradeProposal
+    respondToTradeProposal,
+    deleteBook
 } from '../data/appData';
 import type { BookEntry, BookTrade } from '../types/appTypes';
 
@@ -71,7 +72,6 @@ const UserProfilePage: React.FC = () => {
             return;
         }
 
-        // Перенаправляем на страницу оплаты, передавая сумму через state
         navigate('/payment', { state: { amount: amount } });
     };
 
@@ -88,10 +88,12 @@ const UserProfilePage: React.FC = () => {
         if (result.success) {
             setSuccessMessage(result.message);
             if (activeUser) {
+                // Обновляем списки книг и обменов после успешной операции
                 setMyBooks(getBooksByOwnerId(activeUser.id));
                 const { incoming, outgoing } = getTradeOffersForUser(activeUser.id);
                 setIncomingTrades(incoming);
                 setOutgoingTrades(outgoing);
+                // Обновляем данные пользователя, так как баланс мог измениться
                 const updatedUser = findUserById(activeUser.id);
                 if (updatedUser) {
                     setActiveUser(updatedUser);
@@ -123,6 +125,43 @@ const UserProfilePage: React.FC = () => {
         }
     };
 
+    /**
+     * @function handleDeleteBook
+     * @description Обработчик удаления книги.
+     * @param {string} bookId - ID книги для удаления.
+     */
+    const handleDeleteBook = (bookId: string) => {
+        if (!activeUser) {
+            alert('Вы не авторизованы.');
+            return;
+        }
+        if (window.confirm('Вы уверены, что хотите удалить эту книгу? Это действие необратимо.')) {
+            const result = deleteBook(bookId, activeUser.id);
+            if (result.success) {
+                setSuccessMessage(result.message);
+                // Обновляем список книг пользователя после удаления
+                setMyBooks(getBooksByOwnerId(activeUser.id));
+                // Также обновляем предложения обмена, так как удаленная книга могла быть в них
+                const { incoming, outgoing } = getTradeOffersForUser(activeUser.id);
+                setIncomingTrades(incoming);
+                setOutgoingTrades(outgoing);
+            } else {
+                setErrorMessage(result.message);
+            }
+        }
+    };
+
+    // Вспомогательная функция для определения пути к обложке
+    const getCoverPath = (imageUrl: string): string => {
+        // Если это Data URL или внешний URL, используем его напрямую.
+        // Если это локальный файл (например, '/book-cover-default.png'), добавляем слэш.
+        if (imageUrl.startsWith('http') || imageUrl.startsWith('data:image/')) {
+            return imageUrl;
+        }
+        return `/${imageUrl}`;
+    };
+
+
     if (!activeUser) {
         return <div className="page-message">Загрузка профиля...</div>;
     }
@@ -147,7 +186,7 @@ const UserProfilePage: React.FC = () => {
                             required
                             aria-label="Сумма пополнения"
                         />
-                        <button type="submit" className="submit-button">Перейти к оплате</button> {/* Изменено название кнопки */}
+                        <button type="submit" className="submit-button">Перейти к оплате</button>
                         <button type="button" onClick={() => setShowTopUpForm(false)} className="cancel-button">Отмена</button>
                     </form>
                 )}
@@ -167,14 +206,16 @@ const UserProfilePage: React.FC = () => {
                                 <div className="trade-books-display">
                                     <div className="book-item">
                                         <Link to={`/book/${trade.initiatorBook.id}`}>
-                                            <img src={trade.initiatorBook.coverImageUrl.startsWith('http') ? trade.initiatorBook.coverImageUrl : `/${trade.initiatorBook.coverImageUrl}`} alt={trade.initiatorBook.title} />
+                                            {/* ИЗМЕНЕНО: Используем getCoverPath */}
+                                            <img src={getCoverPath(trade.initiatorBook.coverImageUrl)} alt={trade.initiatorBook.title} />
                                         </Link>
                                         <p>{trade.initiatorBook.title}</p>
                                     </div>
                                     <span className="trade-arrow">&harr;</span>
                                     <div className="book-item">
                                         <Link to={`/book/${trade.recipientBook.id}`}>
-                                            <img src={trade.recipientBook.coverImageUrl.startsWith('http') ? trade.recipientBook.coverImageUrl : `/${trade.recipientBook.coverImageUrl}`} alt={trade.recipientBook.title} />
+                                            {/* ИЗМЕНЕНО: Используем getCoverPath */}
+                                            <img src={getCoverPath(trade.recipientBook.coverImageUrl)} alt={trade.recipientBook.title} />
                                         </Link>
                                         <p>на вашу: {trade.recipientBook.title}</p>
                                     </div>
@@ -199,14 +240,16 @@ const UserProfilePage: React.FC = () => {
                                 <div className="trade-books-display">
                                     <div className="book-item">
                                         <Link to={`/book/${trade.initiatorBook.id}`}>
-                                            <img src={trade.initiatorBook.coverImageUrl.startsWith('http') ? trade.initiatorBook.coverImageUrl : `/${trade.initiatorBook.coverImageUrl}`} alt={trade.initiatorBook.title} />
+                                            {/* ИЗМЕНЕНО: Используем getCoverPath */}
+                                            <img src={getCoverPath(trade.initiatorBook.coverImageUrl)} alt={trade.initiatorBook.title} />
                                         </Link>
                                         <p>{trade.initiatorBook.title}</p>
                                     </div>
                                     <span className="trade-arrow">&harr;</span>
                                     <div className="book-item">
                                         <Link to={`/book/${trade.recipientBook.id}`}>
-                                            <img src={trade.recipientBook.coverImageUrl.startsWith('http') ? trade.recipientBook.coverImageUrl : `/${trade.recipientBook.coverImageUrl}`} alt={trade.recipientBook.title} />
+                                            {/* ИЗМЕНЕНО: Используем getCoverPath */}
+                                            <img src={getCoverPath(trade.recipientBook.coverImageUrl)} alt={trade.recipientBook.title} />
                                         </Link>
                                         <p>на: {trade.recipientBook.title}</p>
                                     </div>
@@ -226,7 +269,17 @@ const UserProfilePage: React.FC = () => {
                 <h2 className="section-title">Мои книги</h2>
                 {myBooks.length > 0 ? (
                     <div className="book-grid">
-                        {myBooks.map(book => <BookCard key={book.id} book={book} />)}
+                        {myBooks.map(book => (
+                            <div key={book.id} className="my-book-card-wrapper">
+                                <BookCard book={book} />
+                                <button
+                                    onClick={() => handleDeleteBook(book.id)}
+                                    className="action-button reject-button delete-book-button"
+                                >
+                                    Удалить
+                                </button>
+                            </div>
+                        ))}
                     </div>
                 ) : (
                     <p className="no-content-message">У вас пока нет книг. <Link to="/add-book" className="link-text">Добавить книгу?</Link></p>
