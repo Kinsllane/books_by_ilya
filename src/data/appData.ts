@@ -5,14 +5,12 @@ import type { BookEntry, UserProfile, BookReview, BookQuote, BookTrade } from '.
 
 // --- Имитация базы данных (хранение в памяти) ---
 
-// Массив зарегистрированных пользователей
 let registeredUsers: UserProfile[] = [
     { id: 'usr-001', name: 'Алиса', password: 'password123', balance: 1000, registrationDate: '2023-01-15' },
     { id: 'usr-002', name: 'Борис', password: 'password123', balance: 1500, registrationDate: '2023-02-20' },
     { id: 'usr-003', name: 'Вера', password: 'password123', balance: 800, registrationDate: '2023-03-10' },
 ];
 
-// Массив доступных книг
 export let availableBooks: BookEntry[] = [
     {
         id: 'book-001',
@@ -66,7 +64,6 @@ export let availableBooks: BookEntry[] = [
     }
 ];
 
-// Массив активных предложений обмена
 export let activeTrades: BookTrade[] = [];
 
 // --- Функции для работы с пользователями ---
@@ -174,6 +171,46 @@ export const addNewBook = (bookDetails: Omit<BookEntry, 'id' | 'currentOwner' | 
     availableBooks = [newBook, ...availableBooks];
     return newBook;
 };
+
+/**
+ * @function updateBook
+ * @description Обновляет информацию о существующей книге.
+ * @param {string} bookId - ID книги для обновления.
+ * @param {Omit<BookEntry, 'id' | 'currentOwner' | 'reviews' | 'quotes'>} updatedDetails - Обновленные детали книги.
+ * @param {string} userId - ID пользователя, пытающегося обновить книгу (для проверки прав).
+ * @returns {{ success: boolean, message: string, updatedBook?: BookEntry }} Результат операции.
+ */
+export const updateBook = (
+    bookId: string,
+    updatedDetails: Omit<BookEntry, 'id' | 'currentOwner' | 'reviews' | 'quotes'>,
+    userId: string
+): { success: boolean, message: string, updatedBook?: BookEntry } => {
+    const bookIndex = availableBooks.findIndex(book => book.id === bookId);
+
+    if (bookIndex === -1) {
+        return { success: false, message: "Книга не найдена." };
+    }
+
+    const existingBook = availableBooks[bookIndex];
+
+    // Проверяем, является ли пользователь владельцем книги
+    if (existingBook.currentOwner.id !== userId) {
+        return { success: false, message: "У вас нет прав для редактирования этой книги." };
+    }
+
+    // Обновляем свойства книги
+    const updatedBook: BookEntry = {
+        ...existingBook, // Сохраняем существующие ID, владельца, рецензии, цитаты
+        ...updatedDetails, // Применяем новые детали
+        // Убедимся, что priceValue корректно устанавливается/удаляется
+        priceValue: updatedDetails.isForSale ? updatedDetails.priceValue : undefined
+    };
+
+    availableBooks[bookIndex] = updatedBook;
+
+    return { success: true, message: "Информация о книге успешно обновлена.", updatedBook };
+};
+
 
 /**
  * @function deleteBook

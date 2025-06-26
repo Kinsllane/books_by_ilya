@@ -9,10 +9,11 @@ import BookDetailsPage from './pages/BookDetailsPage';
 import UserLoginPage from './pages/UserLoginPage';
 import UserRegisterPage from './pages/UserRegisterPage';
 import AddBookFormPage from './pages/AddBookFormPage';
+import EditBookFormPage from './pages/EditBookFormPage';
 import ProposeTradePage from './pages/ProposeTradePage';
 import UserProfilePage from './pages/UserProfilePage';
-import PaymentPage from './pages/PaymentPage'; // <-- Новый импорт
 import AuthWrapper from './components/auth/AuthWrapper';
+import PaymentPage from './pages/PaymentPage'; // <-- Новый импорт: PaymentPage
 
 /**
  * @component App
@@ -41,6 +42,14 @@ const App: React.FC = () => {
                         }
                     />
                     <Route
+                        path="/edit-book/:id"
+                        element={
+                            <AuthWrapper>
+                                <EditBookFormPage />
+                            </AuthWrapper>
+                        }
+                    />
+                    <Route
                         path="/propose-trade/:bookId"
                         element={
                             <AuthWrapper>
@@ -56,8 +65,7 @@ const App: React.FC = () => {
                             </AuthWrapper>
                         }
                     />
-                    {/* НОВЫЙ МАРШРУТ ДЛЯ ОПЛАТЫ */}
-                    <Route
+                    <Route // <-- Добавлен маршрут для PaymentPage
                         path="/payment"
                         element={
                             <AuthWrapper>

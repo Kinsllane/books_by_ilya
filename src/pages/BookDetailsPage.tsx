@@ -1,52 +1,58 @@
 // src/pages/BookDetailsPage.tsx
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom'; // Добавляем Link
 import { useAuthStatus } from '../hooks/useAuthStatus';
 import {
     retrieveBookById,
-    addReviewToBook, // Изменено с addBookReview
-    addQuoteToBook,   // Изменено с addBookQuote
+    addReviewToBook,
+    addQuoteToBook,
     purchaseBook,
-    availableBooks
+    availableBooks // Импортируем для принудительного обновления
 } from '../data/appData';
 
 import ReviewForm from '../components/forms/ReviewForm';
 import QuoteForm from '../components/forms/QuoteForm';
 
+/**
+ * @component BookDetailsPage
+ * @description Страница, отображающая подробную информацию о книге, рецензии, цитаты,
+ * а также кнопки для покупки, обмена и добавления контента.
+ */
 const BookDetailsPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { activeUser, setActiveUser } = useAuthStatus();
 
+    // Состояние книги, инициализируется при загрузке
     const [book, setBook] = useState(() => retrieveBookById(id));
     const [showReviewForm, setShowReviewForm] = useState(false);
     const [showQuoteForm, setShowQuoteForm] = useState(false);
 
+    // Эффект для обновления книги, если данные в appData изменились (например, после покупки/редактирования)
     useEffect(() => {
         setBook(retrieveBookById(id));
-    }, [id, availableBooks]);
+    }, [id, availableBooks]); // Зависимость от availableBooks для реакции на изменения в глобальном массиве
 
+    // Обработчик добавления рецензии
     const handleAddReview = (text: string) => {
         if (activeUser && book) {
-            // Обновляем книгу в appData и получаем обновленный объект
-            addReviewToBook(book.id, text, activeUser);
-            // Принудительно обновляем состояние книги, чтобы UI обновился
-            setBook(retrieveBookById(book.id));
+            addReviewToBook(book.id, text, activeUser); // Обновляем книгу в appData
+            setBook(retrieveBookById(book.id)); // Перечитываем книгу из appData для обновления состояния
             setShowReviewForm(false);
         }
     };
 
+    // Обработчик добавления цитаты
     const handleAddQuote = (text: string) => {
         if (activeUser && book) {
-            // Обновляем книгу в appData и получаем обновленный объект
-            addQuoteToBook(book.id, text, activeUser);
-            // Принудительно обновляем состояние книги, чтобы UI обновился
-            setBook(retrieveBookById(book.id));
+            addQuoteToBook(book.id, text, activeUser); // Обновляем книгу в appData
+            setBook(retrieveBookById(book.id)); // Перечитываем книгу из appData для обновления состояния
             setShowQuoteForm(false);
         }
     };
 
+    // Обработчик покупки книги
     const handleBuyBook = () => {
         if (!activeUser) {
             alert('Пожалуйста, войдите в систему, чтобы совершить покупку.');
@@ -61,9 +67,11 @@ const BookDetailsPage: React.FC = () => {
         const result = purchaseBook(book.id, activeUser.id);
         if (result.success) {
             alert(result.message);
-            // Обновляем книгу в состоянии, используя данные из result
-            setBook(result.book || retrieveBookById(book.id)); // Используем result.book, если есть, иначе перечитываем
+            // Обновляем книгу в состоянии, используя данные из result.book, если они есть,
+            // иначе перечитываем из appData (на случай, если result.book undefined)
+            setBook(result.book || retrieveBookById(book.id));
             if (result.buyer) {
+                // Обновляем баланс текущего пользователя в контексте
                 const { password, ...userToStore } = result.buyer;
                 setActiveUser(userToStore);
             }
@@ -72,6 +80,7 @@ const BookDetailsPage: React.FC = () => {
         }
     };
 
+    // Обработчик предложения обмена
     const handleProposeTrade = () => {
         if (!activeUser) {
             alert('Пожалуйста, войдите в систему, чтобы предложить обмен.');
@@ -83,10 +92,12 @@ const BookDetailsPage: React.FC = () => {
         }
     };
 
+    // Если книга не найдена
     if (!book) {
         return <div className="page-message">Книга не найдена.</div>;
     }
 
+    // Проверяем, является ли текущий пользователь владельцем книги
     const isOwner = activeUser?.id === book.currentOwner.id;
     // Определяем путь к обложке. Если это Data URL или внешний URL, используем его напрямую.
     const coverPath = book.coverImageUrl.startsWith('http') || book.coverImageUrl.startsWith('data:image/')
@@ -107,6 +118,8 @@ const BookDetailsPage: React.FC = () => {
                         <p className="book-price"><strong>Цена:</strong> {book.priceValue}₽</p>
                     )}
                     <p className="book-description">{book.description}</p>
+                    {/* Отображаем год публикации */}
+                    <p className="book-publication-year"><strong>Год публикации:</strong> {book.publicationYear}</p>
 
                     <div className="book-actions">
                         {book.isForSale && !isOwner && (
@@ -116,7 +129,13 @@ const BookDetailsPage: React.FC = () => {
                             <button onClick={handleProposeTrade} className="action-button trade-button">Предложить обмен</button>
                         )}
                         {isOwner && (
-                            <p className="owner-message"><em>Это ваша книга.</em></p>
+                            <>
+                                <p className="owner-message"><em>Это ваша книга.</em></p>
+                                {/* Кнопка редактирования */}
+                                <Link to={`/edit-book/${book.id}`} className="action-button primary-button edit-button">
+                                    Редактировать
+                                </Link>
+                            </>
                         )}
                     </div>
                 </div>
