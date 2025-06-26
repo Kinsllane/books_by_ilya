@@ -13,7 +13,8 @@ import EditBookFormPage from './pages/EditBookFormPage';
 import ProposeTradePage from './pages/ProposeTradePage';
 import UserProfilePage from './pages/UserProfilePage';
 import AuthWrapper from './components/auth/AuthWrapper';
-import PaymentPage from './pages/PaymentPage'; // <-- Новый импорт: PaymentPage
+import PaymentPage from './pages/PaymentPage';
+import AdminDashboardPage from './pages/AdminDashboardPage'; // <-- НОВЫЙ ИМПОРТ
 
 /**
  * @component App
@@ -65,11 +66,19 @@ const App: React.FC = () => {
                             </AuthWrapper>
                         }
                     />
-                    <Route // <-- Добавлен маршрут для PaymentPage
+                    <Route
                         path="/payment"
                         element={
                             <AuthWrapper>
                                 <PaymentPage />
+                            </AuthWrapper>
+                        }
+                    />
+                    <Route // <-- НОВЫЙ МАРШРУТ ДЛЯ АДМИН-ПАНЕЛИ
+                        path="/admin-dashboard"
+                        element={
+                            <AuthWrapper>
+                                <AdminDashboardPage />
                             </AuthWrapper>
                         }
                     />

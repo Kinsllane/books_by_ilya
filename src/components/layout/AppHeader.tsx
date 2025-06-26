@@ -2,14 +2,14 @@
 
 import React from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { useAuthStatus } from '../../hooks/useAuthStatus'; // Импортируем наш хук аутентификации
+import { useAuthStatus } from '../../hooks/useAuthStatus';
 
 /**
  * @component AppHeader
  * @description Компонент шапки приложения, содержащий логотип, навигацию и информацию о пользователе.
  */
 const AppHeader: React.FC = () => {
-    const { activeUser, signOut } = useAuthStatus(); // Получаем текущего пользователя и функцию выхода
+    const { activeUser, signOut } = useAuthStatus();
     const navigate = useNavigate();
 
     /**
@@ -17,32 +17,35 @@ const AppHeader: React.FC = () => {
      * @description Обработчик выхода пользователя из системы.
      */
     const handleLogout = () => {
-        signOut(); // Вызываем функцию выхода
-        navigate('/'); // Перенаправляем на главную страницу после выхода
+        signOut();
+        navigate('/');
     };
 
     return (
-        <header className="app-header"> {/* Основной элемент шапки */}
-            <Link to="/" className="app-logo"> {/* Логотип, ведущий на главную */}
-                <img src="/logo.png" alt="BookSwap Logo" /> {/* Предполагается, что у вас есть файл logo.png в public/ */}
+        <header className="app-header">
+            <Link to="/" className="app-logo">
+                <img src="/logo.png" alt="BookSwap Logo" />
                 <span>BookTradeIlya</span>
             </Link>
-            <nav className="main-nav"> {/* Основная навигация */}
+            <nav className="main-nav">
                 <NavLink to="/" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Главная</NavLink>
                 
-                {activeUser ? ( // Если пользователь авторизован
+                {activeUser ? (
                     <>
+                        {activeUser.role === 'admin' && ( // <-- ПОКАЗЫВАЕМ ССЫЛКУ ТОЛЬКО АДМИНАМ
+                            <NavLink to="/admin-dashboard" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Админ-панель</NavLink>
+                        )}
                         <NavLink to="/my-profile" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Мой профиль</NavLink>
                         <NavLink to="/add-book" className="nav-link add-book-btn">Добавить книгу</NavLink>
-                        <div className="user-controls"> {/* Контролы для авторизованного пользователя */}
+                        <div className="user-controls">
                            <span className="user-info">
                                 Привет, {activeUser.name}! (Баланс: {activeUser.balance}₽)
                             </span>
                            <button onClick={handleLogout} className="logout-btn">Выйти</button>
                         </div>
                     </>
-                ) : ( // Если пользователь не авторизован
-                     <div className="auth-links"> {/* Ссылки для входа/регистрации */}
+                ) : (
+                     <div className="auth-links">
                         <NavLink to="/login" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Войти</NavLink>
                         <NavLink to="/register" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Регистрация</NavLink>
                     </div>

@@ -1373,3 +1373,212 @@
         max-width: 100%; /* Полная ширина на очень маленьких экранах */
     }
 }
+/* src/styles/main.css */
+
+/* ... (весь предыдущий код CSS) ... */
+
+/* --- Стили для AdminDashboardPage --- */
+.admin-section {
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    padding: calc(var(--spacing-unit) * 3);
+    margin-bottom: calc(var(--spacing-unit) * 3);
+}
+
+.admin-section h3 {
+    font-family: var(--font-family-headings);
+    font-size: 1.8rem;
+    color: var(--primary-dark-color);
+    margin-bottom: calc(var(--spacing-unit) * 2);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: var(--spacing-unit);
+}
+
+.user-list {
+    list-style: none;
+    padding: 0;
+}
+
+.user-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: calc(var(--spacing-unit) * 1.5);
+    border-bottom: 1px solid #eee;
+    font-size: 1.1rem;
+    color: var(--text-color);
+}
+
+.user-item:last-child {
+    border-bottom: none;
+}
+
+.user-item span {
+    flex-grow: 1;
+    margin-right: calc(var(--spacing-unit) * 2);
+}
+
+.user-item .action-button {
+    padding: calc(var(--spacing-unit) * 0.8) calc(var(--spacing-unit) * 1.5);
+    font-size: 0.9rem;
+}
+
+/* Адаптивность для AdminDashboardPage */
+@media (max-width: 768px) {
+    .admin-section {
+        padding: calc(var(--spacing-unit) * 2);
+    }
+
+    .admin-section h3 {
+        font-size: 1.5rem;
+    }
+
+    .user-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-unit);
+    }
+
+    .user-item span {
+        margin-right: 0;
+    }
+
+    .user-item .action-button {
+        width: 100%;
+        max-width: 150px;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-section {
+        padding: calc(var(--spacing-unit) * 1.5);
+    }
+
+    .admin-section h3 {
+        font-size: 1.3rem;
+    }
+
+    .user-item {
+        font-size: 1rem;
+    }
+}
+/* src/styles/main.css */
+
+/* ... (весь предыдущий код CSS) ... */
+
+/* --- Стили для AdminDashboardPage --- */
+.admin-section {
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    padding: calc(var(--spacing-unit) * 3);
+    margin-bottom: calc(var(--spacing-unit) * 3);
+}
+
+.admin-section h3 {
+    font-family: var(--font-family-headings);
+    font-size: 1.8rem;
+    color: var(--primary-dark-color);
+    margin-bottom: calc(var(--spacing-unit) * 2);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: var(--spacing-unit);
+}
+
+.user-list {
+    list-style: none;
+    padding: 0;
+}
+
+.user-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: calc(var(--spacing-unit) * 1.5);
+    border-bottom: 1px solid #eee;
+    font-size: 1.1rem;
+    color: var(--text-color);
+}
+
+.user-item:last-child {
+    border-bottom: none;
+}
+
+.user-item span {
+    flex-grow: 1;
+    margin-right: calc(var(--spacing-unit) * 2);
+}
+
+.user-item .action-button {
+    padding: calc(var(--spacing-unit) * 0.8) calc(var(--spacing-unit) * 1.5);
+    font-size: 0.9rem;
+}
+
+/* Стили для обертки карточки книги и кнопки удаления в админке */
+.admin-book-card-wrapper { /* <-- НОВЫЙ СТИЛЬ */
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-unit); /* Отступ между карточкой и кнопкой */
+    align-items: center; /* Центрируем кнопку под карточкой */
+}
+
+.admin-book-card-wrapper .book-card { /* Убедимся, что BookCard внутри обертки занимает всю доступную ширину */
+    width: 100%;
+}
+
+.delete-book-button { /* <-- НОВЫЙ СТИЛЬ */
+    width: 100%; /* Кнопка занимает всю ширину карточки */
+    max-width: 250px; /* Ограничиваем ширину, чтобы не была слишком широкой */
+    padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 2);
+    font-size: 0.95rem;
+    margin-top: 0; /* Убираем лишний отступ, так как gap уже есть */
+}
+
+
+/* Адаптивность для AdminDashboardPage */
+@media (max-width: 768px) {
+    .admin-section {
+        padding: calc(var(--spacing-unit) * 2);
+    }
+
+    .admin-section h3 {
+        font-size: 1.5rem;
+    }
+
+    .user-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-unit);
+    }
+
+    .user-item span {
+        margin-right: 0;
+    }
+
+    .user-item .action-button {
+        width: 100%;
+        max-width: 150px;
+    }
+
+    .delete-book-button { /* Адаптивность для кнопки удаления книги */
+        max-width: 200px; /* Меньшая ширина на мобильных */
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-section {
+        padding: calc(var(--spacing-unit) * 1.5);
+    }
+
+    .admin-section h3 {
+        font-size: 1.3rem;
+    }
+
+    .user-item {
+        font-size: 1rem;
+    }
+
+    .delete-book-button { /* Адаптивность для кнопки удаления книги */
+        max-width: 100%; /* Полная ширина на очень маленьких экранах */
+    }
+}

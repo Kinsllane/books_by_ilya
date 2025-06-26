@@ -3,30 +3,68 @@
 import { v4 as generateUniqueId } from 'uuid';
 import type { BookEntry, UserProfile, BookReview, BookQuote, BookTrade } from '../types/appTypes';
 
-// --- Имитация базы данных (хранение в памяти) ---
+// --- Вспомогательные функции для работы с localStorage ---
+const LS_PREFIX = 'bookswap_'; // Префикс для ключей в localStorage, чтобы избежать конфликтов
 
-let registeredUsers: UserProfile[] = [
-    { id: 'usr-001', name: 'Алиса', password: 'password123', balance: 1000, registrationDate: '2023-01-15' },
-    { id: 'usr-002', name: 'Борис', password: 'password123', balance: 1500, registrationDate: '2023-02-20' },
-    { id: 'usr-003', name: 'Вера', password: 'password123', balance: 800, registrationDate: '2023-03-10' },
+/**
+ * Загружает данные из localStorage.
+ * @param key Ключ для хранения данных.
+ * @param defaultData Данные по умолчанию, если в localStorage ничего нет или произошла ошибка.
+ * @returns Загруженные данные или данные по умолчанию.
+ */
+const loadData = <T>(key: string, defaultData: T): T => {
+    try {
+        const storedData = localStorage.getItem(LS_PREFIX + key);
+        return storedData ? JSON.parse(storedData) : defaultData;
+    } catch (error) {
+        console.error(`Ошибка загрузки данных из localStorage для ключа ${key}:`, error);
+        return defaultData; // Возвращаем дефолтные данные в случае ошибки
+    }
+};
+
+/**
+ * Сохраняет данные в localStorage.
+ * @param key Ключ для хранения данных.
+ * @param data Данные для сохранения.
+ */
+const saveData = <T>(key: string, data: T) => {
+    try {
+        localStorage.setItem(LS_PREFIX + key, JSON.stringify(data));
+    } catch (error) {
+        console.error(`Ошибка сохранения данных в localStorage для ключа ${key}:`, error);
+    }
+};
+// --- Конец вспомогательных функций ---
+
+
+// --- Дефолтные данные для инициализации (если localStorage пуст) ---
+
+// Дефолтные пользователи
+const DEFAULT_USERS: UserProfile[] = [
+    { id: 'usr-001', name: 'Алиса', password: 'password123', balance: 1000, registrationDate: '2023-01-15', role: 'user' },
+    { id: 'usr-002', name: 'Борис', password: 'password123', balance: 1500, registrationDate: '2023-02-20', role: 'user' },
+    { id: 'usr-003', name: 'Вера', password: 'password123', balance: 800, registrationDate: '2023-03-10', role: 'user' },
+    { id: 'usr-admin', name: 'Админ', password: 'adminpassword', balance: 9999, registrationDate: '2023-01-01', role: 'admin' },
 ];
 
-export let availableBooks: BookEntry[] = [
+// Дефолтные книги (ВАЖНО: currentOwner, reviewer, quoter - это просто объекты с ID,
+// ссылки на реальные UserProfile будут восстановлены ниже)
+const DEFAULT_BOOKS: BookEntry[] = [
     {
         id: 'book-001',
         title: 'Тень Ветра',
         author: 'Карлос Руис Сафон',
         description: 'Однажды в туманном рассвете 1945 года мальчик по имени Даниель попадает в таинственное место в сердце старого города — на Кладбище Забытых Книг. Там он находит проклятую книгу, которая изменит всю его жизнь и погрузит его в лабиринт интриг и тайн, скрытых в темной душе города.',
         coverImageUrl: 'book-cover-1.png',
-        currentOwner: registeredUsers[0],
+        currentOwner: { id: 'usr-001', name: 'Алиса', balance: 0, registrationDate: '', role: 'user' },
         isForSale: true,
         isForTrade: true,
         priceValue: 300,
         reviews: [
-            { id: 'rev-001', text: 'Захватывающая история, не мог оторваться!', reviewer: registeredUsers[1] },
+            { id: 'rev-001', text: 'Захватывающая история, не мог оторваться!', reviewer: { id: 'usr-002', name: 'Борис', balance: 0, registrationDate: '', role: 'user' } },
         ],
         quotes: [
-            { id: 'qte-001', text: 'Книги — это зеркала: в них мы видим лишь то, что уже несем в своей душе.', quoter: registeredUsers[0] },
+            { id: 'qte-001', text: 'Книги — это зеркала: в них мы видим лишь то, что уже несем в своей душе.', quoter: { id: 'usr-001', name: 'Алиса', balance: 0, registrationDate: '', role: 'user' } },
         ],
         publicationYear: 2001
     },
@@ -36,12 +74,12 @@ export let availableBooks: BookEntry[] = [
         author: 'Фрэнк Герберт',
         description: 'История Пола Атрейдеса, наследника могущественного дома, которому предстоит бороться за контроль над пустынной планетой Арракис, единственным источником самого ценного вещества во вселенной — пряности.',
         coverImageUrl: 'book-cover-2.png',
-        currentOwner: registeredUsers[1],
+        currentOwner: { id: 'usr-002', name: 'Борис', balance: 0, registrationDate: '', role: 'user' },
         isForSale: false,
         isForTrade: true,
         reviews: [
-            { id: 'rev-002', text: 'Величайшая научная фантастика всех времен. Обязательно к прочтению.', reviewer: registeredUsers[2] },
-            { id: 'rev-003', text: 'Сложно, но очень интересно.', reviewer: registeredUsers[0] },
+            { id: 'rev-002', text: 'Величайшая научная фантастика всех времен. Обязательно к прочтению.', reviewer: { id: 'usr-003', name: 'Вера', balance: 0, registrationDate: '', role: 'user' } },
+            { id: 'rev-003', text: 'Сложно, но очень интересно.', reviewer: { id: 'usr-001', name: 'Алиса', balance: 0, registrationDate: '', role: 'user' } },
         ],
         quotes: [],
         publicationYear: 1965
@@ -52,19 +90,106 @@ export let availableBooks: BookEntry[] = [
         author: 'Джейн Остен',
         description: 'Классический роман о нравах, воспитании, морали и браке в обществе землевладельцев в Англии начала XIX века. В центре сюжета — отношения между Элизабет Беннет и богатым аристократом Фицуильямом Дарси.',
         coverImageUrl: 'book-cover-3.png',
-        currentOwner: registeredUsers[2],
+        currentOwner: { id: 'usr-003', name: 'Вера', balance: 0, registrationDate: '', role: 'user' },
         isForSale: true,
         isForTrade: false,
         priceValue: 250,
         reviews: [],
         quotes: [
-            { id: 'qte-002', text: 'Всеобщее признание, что одинокий мужчина, обладающий хорошим состоянием, должен нуждаться в жене.', quoter: registeredUsers[2] },
+            { id: 'qte-002', text: 'Всеобщее признание, что одинокий мужчина, обладающий хорошим состоянием, должен нуждаться в жене.', quoter: { id: 'usr-003', name: 'Вера', balance: 0, registrationDate: '', role: 'user' } },
         ],
         publicationYear: 1813
     }
 ];
 
-export let activeTrades: BookTrade[] = [];
+// --- Имитация базы данных (хранение в памяти, загрузка из localStorage) ---
+
+export let registeredUsers: UserProfile[] = loadData('registeredUsers', DEFAULT_USERS);
+export let availableBooks: BookEntry[] = loadData('availableBooks', DEFAULT_BOOKS);
+export let activeTrades: BookTrade[] = loadData('activeTrades', []);
+
+
+// --- Восстановление ссылок на объекты после загрузки из localStorage ---
+// Это необходимо, потому что JSON.stringify/parse теряет ссылки,
+// и мы хотим, чтобы все BookEntry.currentOwner, BookReview.reviewer и т.д.
+// ссылались на реальные объекты из registeredUsers.
+
+// 1. Восстанавливаем ссылки на UserProfile в BookEntry (currentOwner, reviews, quotes)
+availableBooks.forEach(book => {
+    // currentOwner
+    const owner = registeredUsers.find(u => u.id === book.currentOwner.id);
+    if (owner) {
+        book.currentOwner = owner;
+    } else {
+        // Если владелец не найден (например, удален), можно назначить первого пользователя
+        // или удалить книгу, или пометить как "без владельца".
+        console.warn(`Владелец книги "${book.title}" (ID: ${book.id}) не найден. Назначаем первого пользователя.`);
+        book.currentOwner = registeredUsers[0]; // Назначаем первого пользователя по умолчанию
+    }
+
+    // reviews.reviewer
+    book.reviews.forEach(review => {
+        const reviewer = registeredUsers.find(u => u.id === review.reviewer.id);
+        if (reviewer) {
+            review.reviewer = reviewer;
+        } else {
+            console.warn(`Рецензент рецензии ${review.id} для книги "${book.title}" не найден.`);
+            review.reviewer = registeredUsers[0]; // Назначаем первого пользователя по умолчанию
+        }
+    });
+
+    // quotes.quoter
+    book.quotes.forEach(quote => {
+        const quoter = registeredUsers.find(u => u.id === quote.quoter.id);
+        if (quoter) {
+            quote.quoter = quoter;
+        } else {
+            console.warn(`Автор цитаты ${quote.id} для книги "${book.title}" не найден.`);
+            quote.quoter = registeredUsers[0]; // Назначаем первого пользователя по умолчанию
+        }
+    });
+});
+
+// 2. Восстанавливаем ссылки на UserProfile и BookEntry в BookTrade
+activeTrades.forEach(trade => {
+    // initiator
+    const initiator = registeredUsers.find(u => u.id === trade.initiator.id);
+    if (initiator) {
+        trade.initiator = initiator;
+    } else {
+        console.warn(`Инициатор обмена ${trade.id} не найден. Обмен будет отклонен.`);
+        trade.status = 'rejected'; // Отклоняем обмен, если инициатор не найден
+    }
+
+    // recipient
+    const recipient = registeredUsers.find(u => u.id === trade.recipient.id);
+    if (recipient) {
+        trade.recipient = recipient;
+    } else {
+        console.warn(`Получатель обмена ${trade.id} не найден. Обмен будет отклонен.`);
+        trade.status = 'rejected'; // Отклоняем обмен, если получатель не найден
+    }
+
+    // initiatorBook
+    const initiatorBook = availableBooks.find(b => b.id === trade.initiatorBook.id);
+    if (initiatorBook) {
+        trade.initiatorBook = initiatorBook;
+    } else {
+        console.warn(`Книга инициатора обмена ${trade.id} не найдена. Обмен будет отклонен.`);
+        trade.status = 'rejected'; // Отклоняем обмен, если книга не найдена
+    }
+
+    // recipientBook
+    const recipientBook = availableBooks.find(b => b.id === trade.recipientBook.id);
+    if (recipientBook) {
+        trade.recipientBook = recipientBook;
+    } else {
+        console.warn(`Книга получателя обмена ${trade.id} не найдена. Обмен будет отклонен.`);
+        trade.status = 'rejected'; // Отклоняем обмен, если книга не найдена
+    }
+});
+// --- Конец восстановления ссылок ---
+
 
 // --- Функции для работы с пользователями ---
 
@@ -113,9 +238,11 @@ export const registerNewUser = (username: string, password_raw: string): UserPro
         name: username,
         password: password_raw,
         balance: 500, // Начальный баланс
-        registrationDate: new Date().toISOString().split('T')[0] // Текущая дата
+        registrationDate: new Date().toISOString().split('T')[0], // Текущая дата
+        role: 'user' // по умолчанию новый пользователь - обычный пользователь
     };
     registeredUsers.push(newUser);
+    saveData('registeredUsers', registeredUsers); // Сохраняем изменения
     return newUser;
 };
 
@@ -135,7 +262,57 @@ export const topUpUserBalance = (userId: string, amount: number): { success: boo
         return { success: false, message: "Пользователь не найден." };
     }
     user.balance += amount;
+    saveData('registeredUsers', registeredUsers); // Сохраняем изменения
     return { success: true, message: `Баланс успешно пополнен на ${amount}₽.`, user };
+};
+
+/**
+ * @function deleteUser
+ * @description Удаляет пользователя из системы.
+ * @param {string} userIdToDelete - ID пользователя, которого нужно удалить.
+ * @param {string} adminId - ID администратора, выполняющего действие (для проверки прав).
+ * @returns {{ success: boolean, message: string }} Результат операции.
+ */
+export const deleteUser = (userIdToDelete: string, adminId: string): { success: boolean, message: string } => {
+    const adminUser = findUserById(adminId);
+    if (!adminUser || adminUser.role !== 'admin') {
+        return { success: false, message: "У вас нет прав администратора для удаления пользователей." };
+    }
+
+    if (userIdToDelete === adminId) {
+        return { success: false, message: "Администратор не может удалить сам себя." };
+    }
+
+    const userIndex = registeredUsers.findIndex(user => user.id === userIdToDelete);
+    if (userIndex === -1) {
+        return { success: false, message: "Пользователь не найден." };
+    }
+
+    const userToDelete = registeredUsers[userIndex];
+
+    // Переназначаем книги удаляемого пользователя первому админу или дефолтному пользователю
+    const defaultOwner = registeredUsers.find(u => u.role === 'admin') || registeredUsers[0];
+    availableBooks.forEach(book => {
+        if (book.currentOwner.id === userToDelete.id) {
+            book.currentOwner = defaultOwner;
+        }
+    });
+
+    // Удаляем пользователя
+    registeredUsers.splice(userIndex, 1);
+    saveData('registeredUsers', registeredUsers);
+    saveData('availableBooks', availableBooks); // Сохраняем изменения в книгах, так как владельцы могли измениться
+
+    // Также удаляем все активные предложения обмена, связанные с этим пользователем
+    const initialActiveTradesLength = activeTrades.length;
+    activeTrades = activeTrades.filter(trade =>
+        trade.initiator.id !== userIdToDelete && trade.recipient.id !== userIdToDelete
+    );
+    if (activeTrades.length !== initialActiveTradesLength) {
+        saveData('activeTrades', activeTrades);
+    }
+
+    return { success: true, message: `Пользователь ${userToDelete.name} успешно удален.` };
 };
 
 
@@ -163,12 +340,13 @@ export const addNewBook = (bookDetails: Omit<BookEntry, 'id' | 'currentOwner' | 
     const newBook: BookEntry = {
         ...bookDetails,
         id: `book-${generateUniqueId()}`,
-        currentOwner: owner,
+        currentOwner: owner, // owner уже является ссылкой на объект из registeredUsers
         reviews: [],
         quotes: [],
     };
     // Добавляем новую книгу в начало массива, чтобы она сразу была видна
     availableBooks = [newBook, ...availableBooks];
+    saveData('availableBooks', availableBooks); // Сохраняем изменения
     return newBook;
 };
 
@@ -192,9 +370,11 @@ export const updateBook = (
     }
 
     const existingBook = availableBooks[bookIndex];
+    // Получаем объект пользователя, который пытается обновить
+    const actingUser = findUserById(userId);
 
-    // Проверяем, является ли пользователь владельцем книги
-    if (existingBook.currentOwner.id !== userId) {
+    // Проверяем права: либо владелец, либо администратор
+    if (!actingUser || (existingBook.currentOwner.id !== userId && actingUser.role !== 'admin')) {
         return { success: false, message: "У вас нет прав для редактирования этой книги." };
     }
 
@@ -207,6 +387,7 @@ export const updateBook = (
     };
 
     availableBooks[bookIndex] = updatedBook;
+    saveData('availableBooks', availableBooks); // Сохраняем изменения
 
     return { success: true, message: "Информация о книге успешно обновлена.", updatedBook };
 };
@@ -227,19 +408,25 @@ export const deleteBook = (bookId: string, userId: string): { success: boolean, 
     }
 
     const bookToDelete = availableBooks[bookIndex];
+    const actingUser = findUserById(userId); // Получаем объект пользователя, который пытается удалить
 
-    // Проверяем, является ли пользователь владельцем книги
-    if (bookToDelete.currentOwner.id !== userId) {
+    // Проверяем права: либо владелец, либо администратор
+    if (!actingUser || (bookToDelete.currentOwner.id !== userId && actingUser.role !== 'admin')) { // <-- ИЗМЕНЕНО
         return { success: false, message: "У вас нет прав для удаления этой книги." };
     }
 
     // Удаляем книгу из массива
     availableBooks.splice(bookIndex, 1);
+    saveData('availableBooks', availableBooks); // Сохраняем изменения
 
     // Также удаляем все активные предложения обмена, связанные с этой книгой
+    const initialActiveTradesLength = activeTrades.length;
     activeTrades = activeTrades.filter(trade =>
         trade.initiatorBook.id !== bookId && trade.recipientBook.id !== bookId
     );
+    if (activeTrades.length !== initialActiveTradesLength) {
+        saveData('activeTrades', activeTrades); // Сохраняем изменения, если обмены были удалены
+    }
 
     return { success: true, message: "Книга успешно удалена." };
 };
@@ -258,6 +445,7 @@ export const addReviewToBook = (bookId: string, text: string, reviewer: UserProf
     const newReview: BookReview = { id: `rev-${generateUniqueId()}`, text, reviewer };
     if (book) {
         book.reviews.push(newReview);
+        saveData('availableBooks', availableBooks); // Сохраняем изменения
     }
     return newReview;
 };
@@ -275,6 +463,7 @@ export const addQuoteToBook = (bookId: string, text: string, quoter: UserProfile
     const newQuote: BookQuote = { id: `qte-${generateUniqueId()}`, text, quoter };
     if (book) {
         book.quotes.push(newQuote);
+        saveData('availableBooks', availableBooks); // Сохраняем изменения
     }
     return newQuote;
 };
@@ -310,6 +499,9 @@ export const purchaseBook = (bookId: string, buyerId: string): { success: boolea
     book.currentOwner = buyer; // Смена владельца книги
     book.isForSale = false; // Книга больше не продается
     book.isForTrade = false; // Книга больше не для обмена (по умолчанию после покупки)
+
+    saveData('registeredUsers', registeredUsers); // Сохраняем изменения балансов
+    saveData('availableBooks', availableBooks); // Сохраняем изменения книги (владелец, isForSale, isForTrade)
 
     return { success: true, message: "Покупка книги успешно совершена!", book, buyer };
 };
@@ -369,6 +561,7 @@ export const createNewTradeProposal = (initiatorId: string, initiatorBookId: str
     };
 
     activeTrades.push(newTrade);
+    saveData('activeTrades', activeTrades); // Сохраняем изменения
     return { success: true, message: "Предложение обмена успешно отправлено!" };
 };
 
@@ -386,7 +579,7 @@ export const respondToTradeProposal = (tradeId: string, response: 'accepted' | '
     }
 
     if (response === 'accepted') {
-        const { initiator, initiatorBook, recipient, recipientBook } = trade;
+        const { initiatorBook, recipientBook } = trade;
 
         // Меняем владельцев книг
         const tempOwner = initiatorBook.currentOwner;
@@ -400,9 +593,14 @@ export const respondToTradeProposal = (tradeId: string, response: 'accepted' | '
         recipientBook.isForTrade = false;
 
         trade.status = 'accepted';
+
+        saveData('availableBooks', availableBooks); // Сохраняем изменения книг (владельцы, статусы)
+        saveData('activeTrades', activeTrades); // Сохраняем изменения обмена (статус)
+
         return { success: true, message: "Обмен успешно завершен!" };
     } else {
         trade.status = response;
+        saveData('activeTrades', activeTrades); // Сохраняем изменения обмена (статус)
         const message = response === 'rejected' ? "Предложение обмена отклонено." : "Предложение обмена отменено.";
         return { success: true, message };
     }
