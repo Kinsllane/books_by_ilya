@@ -2,60 +2,51 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuthStatus } from '../hooks/useAuthStatus'; // Импортируем наш хук аутентификации
+import { useAuthStatus } from '../hooks/useAuthStatus';
 import {
-    retrieveBookById, // Правильное название функции
-    addReviewToBook, // Правильное название функции
-    addQuoteToBook, // Правильное название функции
+    retrieveBookById,
+    addReviewToBook, // Изменено с addBookReview
+    addQuoteToBook,   // Изменено с addBookQuote
     purchaseBook,
-    availableBooks // Импортируем для принудительного обновления
-} from '../data/appData'; // Импортируем функции для работы с данными
-import type { BookReview, BookQuote } from '../types/appTypes'; // Импортируем типы
+    availableBooks
+} from '../data/appData';
 
-// Импортируем компоненты форм для рецензий и цитат
 import ReviewForm from '../components/forms/ReviewForm';
 import QuoteForm from '../components/forms/QuoteForm';
 
-/**
- * @component BookDetailsPage
- * @description Страница, отображающая подробную информацию о книге, рецензии, цитаты,
- * а также кнопки для покупки, обмена и добавления контента.
- */
 const BookDetailsPage: React.FC = () => {
-    const { id } = useParams<{ id: string }>(); // Получаем ID книги из URL
+    const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { activeUser, setActiveUser } = useAuthStatus(); // Получаем текущего пользователя и функцию его обновления
+    const { activeUser, setActiveUser } = useAuthStatus();
 
-    // Используем состояние для книги, чтобы принудительно перерендеривать компонент
-    // при добавлении рецензий/цитат или изменении владельца/статуса книги.
-    const [book, setBook] = useState(() => retrieveBookById(id)); // Исправлено: retrieveBookById
+    const [book, setBook] = useState(() => retrieveBookById(id));
     const [showReviewForm, setShowReviewForm] = useState(false);
     const [showQuoteForm, setShowQuoteForm] = useState(false);
 
-    // Эффект для обновления книги, если данные в appData изменились (например, после покупки)
     useEffect(() => {
-        setBook(retrieveBookById(id)); // Исправлено: retrieveBookById
-    }, [id, availableBooks]); // Зависимость от availableBooks для реакции на изменения в глобальном массиве
+        setBook(retrieveBookById(id));
+    }, [id, availableBooks]);
 
-    // Обработчик добавления рецензии
     const handleAddReview = (text: string) => {
         if (activeUser && book) {
-            addReviewToBook(book.id, text, activeUser); // Исправлено: addReviewToBook
-            setBook(retrieveBookById(book.id)); // Обновляем состояние книги, перечитывая из appData
-            setShowReviewForm(false); // Скрываем форму
+            // Обновляем книгу в appData и получаем обновленный объект
+            addReviewToBook(book.id, text, activeUser);
+            // Принудительно обновляем состояние книги, чтобы UI обновился
+            setBook(retrieveBookById(book.id));
+            setShowReviewForm(false);
         }
     };
 
-    // Обработчик добавления цитаты
     const handleAddQuote = (text: string) => {
         if (activeUser && book) {
-            addQuoteToBook(book.id, text, activeUser); // Исправлено: addQuoteToBook
-            setBook(retrieveBookById(book.id)); // Обновляем состояние книги, перечитывая из appData
-            setShowQuoteForm(false); // Скрываем форму
+            // Обновляем книгу в appData и получаем обновленный объект
+            addQuoteToBook(book.id, text, activeUser);
+            // Принудительно обновляем состояние книги, чтобы UI обновился
+            setBook(retrieveBookById(book.id));
+            setShowQuoteForm(false);
         }
     };
 
-    // Обработчик покупки книги
     const handleBuyBook = () => {
         if (!activeUser) {
             alert('Пожалуйста, войдите в систему, чтобы совершить покупку.');
@@ -70,9 +61,9 @@ const BookDetailsPage: React.FC = () => {
         const result = purchaseBook(book.id, activeUser.id);
         if (result.success) {
             alert(result.message);
-            setBook(result.book); // Исправлено: result.book вместо result.updatedBook
-            if (result.buyer) { // Исправлено: result.buyer вместо result.updatedBuyer
-                // Обновляем баланс текущего пользователя в контексте
+            // Обновляем книгу в состоянии, используя данные из result
+            setBook(result.book || retrieveBookById(book.id)); // Используем result.book, если есть, иначе перечитываем
+            if (result.buyer) {
                 const { password, ...userToStore } = result.buyer;
                 setActiveUser(userToStore);
             }
@@ -81,7 +72,6 @@ const BookDetailsPage: React.FC = () => {
         }
     };
 
-    // Обработчик предложения обмена
     const handleProposeTrade = () => {
         if (!activeUser) {
             alert('Пожалуйста, войдите в систему, чтобы предложить обмен.');
@@ -89,19 +79,19 @@ const BookDetailsPage: React.FC = () => {
             return;
         }
         if (book) {
-            navigate(`/propose-trade/${book.id}`); // Перенаправляем на страницу предложения обмена
+            navigate(`/propose-trade/${book.id}`);
         }
     };
 
-    // Если книга не найдена
     if (!book) {
         return <div className="page-message">Книга не найдена.</div>;
     }
 
-    // Проверяем, является ли текущий пользователь владельцем книги
     const isOwner = activeUser?.id === book.currentOwner.id;
-    // Определяем путь к обложке
-    const coverPath = book.coverImageUrl.startsWith('http') ? book.coverImageUrl : `/${book.coverImageUrl}`;
+    // Определяем путь к обложке. Если это Data URL или внешний URL, используем его напрямую.
+    const coverPath = book.coverImageUrl.startsWith('http') || book.coverImageUrl.startsWith('data:image/')
+        ? book.coverImageUrl
+        : `/${book.coverImageUrl}`;
 
     return (
         <div className="book-detail-page">
@@ -136,7 +126,7 @@ const BookDetailsPage: React.FC = () => {
                 <section className="reviews-section">
                     <h3 className="section-title">Рецензии</h3>
                     {book.reviews.length > 0 ? (
-                        book.reviews.map((review: BookReview) => ( // Явный тип
+                        book.reviews.map(review => (
                             <div key={review.id} className="content-card review-card">
                                 <p className="content-text">"{review.text}"</p>
                                 <div className="content-author">- {review.reviewer.name}</div>
@@ -157,7 +147,7 @@ const BookDetailsPage: React.FC = () => {
                 <section className="quotes-section">
                     <h3 className="section-title">Цитаты</h3>
                     {book.quotes.length > 0 ? (
-                        book.quotes.map((quote: BookQuote) => ( // Явный тип
+                        book.quotes.map(quote => (
                             <div key={quote.id} className="content-card quote-card">
                                 <p className="content-text">"{quote.text}"</p>
                                 <div className="content-author">- {quote.quoter.name}</div>

@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStatus } from '../hooks/useAuthStatus'; // Импортируем наш хук аутентификации
-import { addNewBook } from '../data/appData'; // Импортируем функцию для добавления книги
+import { useAuthStatus } from '../hooks/useAuthStatus';
+import { addNewBook } from '../data/appData';
 
 /**
  * @component AddBookFormPage
@@ -12,17 +12,47 @@ import { addNewBook } from '../data/appData'; // Импортируем функ
  */
 const AddBookFormPage: React.FC = () => {
     const navigate = useNavigate();
-    const { activeUser } = useAuthStatus(); // Получаем текущего пользователя
+    const { activeUser } = useAuthStatus();
 
     // Состояния для полей формы
     const [title, setTitle] = useState('');
     const [author, setAuthor] = useState('');
     const [description, setDescription] = useState('');
-    const [coverImageUrl, setCoverImageUrl] = useState('');
+    const [coverImageDataUrl, setCoverImageDataUrl] = useState<string | null>(null);
     const [isForSale, setIsForSale] = useState(false);
     const [priceValue, setPriceValue] = useState('');
     const [isForTrade, setIsForTrade] = useState(false);
-    const [publicationYear, setPublicationYear] = useState(''); // Добавлено: Год публикации
+    // НОВОЕ СОСТОЯНИЕ: Год публикации
+    const [publicationYear, setPublicationYear] = useState<string>(''); // Храним как строку для input
+
+    /**
+     * @function handleFileChange
+     * @description Обработчик изменения файла обложки.
+     * Читает выбранный файл как Data URL.
+     * @param {React.ChangeEvent<HTMLInputElement>} e - Событие изменения файла.
+     */
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Пожалуйста, выберите файл изображения (PNG, JPG, JPEG, GIF).');
+                setCoverImageDataUrl(null);
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setCoverImageDataUrl(reader.result as string);
+            };
+            reader.onerror = () => {
+                alert('Не удалось прочитать файл.');
+                setCoverImageDataUrl(null);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            setCoverImageDataUrl(null);
+        }
+    };
 
     /**
      * @function handleSubmit
@@ -32,45 +62,42 @@ const AddBookFormPage: React.FC = () => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Проверка авторизации (хотя маршрут защищен, это дополнительная мера)
         if (!activeUser) {
             alert('Необходимо войти в систему, чтобы добавить книгу.');
             navigate('/login');
             return;
         }
 
-        // Проверка цены, если книга выставлена на продажу
         if (isForSale && (!priceValue || Number(priceValue) <= 0)) {
             alert('Пожалуйста, укажите корректную цену для продажи (больше 0).');
             return;
         }
 
-        // Проверка года публикации
+        // Дополнительная проверка для года публикации
         const year = Number(publicationYear);
-        if (isNaN(year) || year <= 0 || year > new Date().getFullYear()) {
+        if (isNaN(year) || year <= 0 || year > new Date().getFullYear() + 5) { // Год не может быть в будущем слишком далеко
             alert('Пожалуйста, укажите корректный год публикации.');
             return;
         }
+
+        const finalCoverImageUrl = coverImageDataUrl || '/book-cover-default.png';
 
         // Создаем объект новой книги
         const newBookData = {
             title,
             author,
             description,
-            // Используем предоставленный URL обложки или дефолтную обложку
-            coverImageUrl: coverImageUrl || '/book-cover-default.png',
+            coverImageUrl: finalCoverImageUrl,
             isForSale,
-            // Цена указывается только если книга на продажу, иначе undefined
             priceValue: isForSale ? Number(priceValue) : undefined,
             isForTrade,
-            publicationYear: year // Добавлено: Год публикации
+            publicationYear: year // НОВОЕ ПОЛЕ: Год публикации
         };
 
-        // Добавляем книгу через функцию из appData
         addNewBook(newBookData, activeUser);
 
         alert('Книга успешно добавлена в каталог!');
-        navigate('/'); // Перенаправляем на главную страницу
+        navigate('/');
     };
 
     return (
@@ -109,23 +136,12 @@ const AddBookFormPage: React.FC = () => {
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         required
-                        rows={6} // Увеличиваем высоту текстового поля
+                        rows={6}
                         aria-label="Описание книги"
                     />
                 </div>
 
-                <div className="form-group">
-                    <label htmlFor="coverImageUrl">URL обложки (опционально):</label>
-                    <input
-                        type="text"
-                        id="coverImageUrl"
-                        value={coverImageUrl}
-                        onChange={(e) => setCoverImageUrl(e.target.value)}
-                        placeholder="https://example.com/cover.jpg или book-cover.png"
-                        aria-label="URL обложки книги"
-                    />
-                </div>
-
+                {/* НОВОЕ ПОЛЕ: Год публикации */}
                 <div className="form-group">
                     <label htmlFor="publicationYear">Год публикации:</label>
                     <input
@@ -134,10 +150,32 @@ const AddBookFormPage: React.FC = () => {
                         value={publicationYear}
                         onChange={(e) => setPublicationYear(e.target.value)}
                         required
-                        min="1"
-                        max={new Date().getFullYear()}
+                        min="1" // Минимальный год (можно уточнить)
+                        max={new Date().getFullYear() + 5} // Максимальный год (немного в будущее для гибкости)
                         aria-label="Год публикации книги"
                     />
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="coverImage">Обложка книги (файл):</label>
+                    <input
+                        type="file"
+                        id="coverImage"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        aria-label="Загрузить обложку книги"
+                    />
+                    {coverImageDataUrl && (
+                        <div className="cover-preview">
+                            <p>Предпросмотр обложки:</p>
+                            <img src={coverImageDataUrl} alt="Предпросмотр обложки" style={{ maxWidth: '150px', maxHeight: '200px', marginTop: '10px', border: '1px solid #ddd' }} />
+                        </div>
+                    )}
+                    {!coverImageDataUrl && (
+                        <p className="info-message" style={{ marginTop: '10px' }}>
+                            Если обложка не выбрана, будет использована стандартная.
+                        </p>
+                    )}
                 </div>
 
                 <div className="form-group options-group">
@@ -154,7 +192,7 @@ const AddBookFormPage: React.FC = () => {
                         <label htmlFor="isForSale">Выставить на продажу</label>
                     </div>
 
-                    {isForSale && ( // Поле цены появляется только если выбрана опция "На продажу"
+                    {isForSale && (
                          <div className="form-group nested-group">
                             <label htmlFor="priceValue">Цена (₽):</label>
                             <input
@@ -162,8 +200,8 @@ const AddBookFormPage: React.FC = () => {
                                 id="priceValue"
                                 value={priceValue}
                                 onChange={(e) => setPriceValue(e.target.value)}
-                                required={isForSale} // Обязательно, если на продажу
-                                min="1" // Минимальная цена 1 рубль
+                                required={isForSale}
+                                min="1"
                                 aria-label="Цена книги"
                             />
                         </div>

@@ -1300,4 +1300,44 @@
        from { transform: translateY(20px); opacity: 0; }
        to { transform: translateY(0); opacity: 1; }
    }
-   
+   /* --- Стили для PaymentPage --- */
+.payment-form .half-width-group {
+    display: flex;
+    gap: calc(var(--spacing-unit) * 2);
+    margin-bottom: 20px;
+}
+
+.payment-form .half-width-item {
+    flex: 1;
+}
+
+@media (max-width: 480px) {
+    .payment-form .half-width-group {
+        flex-direction: column;
+    }
+}
+/* Стили для предпросмотра обложки в AddBookFormPage */
+.cover-preview {
+    margin-top: 15px;
+    padding: 10px;
+    border: 1px dashed var(--border-color);
+    border-radius: var(--border-radius);
+    text-align: center;
+    background-color: #fcfcfc;
+}
+
+.cover-preview p {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.cover-preview img {
+    max-width: 150px;
+    max-height: 200px;
+    margin-top: 10px;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    object-fit: contain; /* Чтобы изображение полностью помещалось */
+}
+

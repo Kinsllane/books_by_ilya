@@ -2,17 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuthStatus } from '../hooks/useAuthStatus'; // Импортируем наш хук аутентификации
-import BookCard from '../components/books/BookCard'; // Импортируем компонент BookCard
+import { useAuthStatus } from '../hooks/useAuthStatus';
+import BookCard from '../components/books/BookCard';
 import {
-    availableBooks, // Для принудительного обновления списка книг
-    activeTrades, // Для принудительного обновления списка обменов
-    retrieveBookById, // Для получения деталей книги по ID
-    findUserById, // Для получения деталей пользователя по ID
-    topUpUserBalance,
-    respondToTradeProposal // Правильное название функции
-} from '../data/appData'; // Импортируем функции для работы с данными
-import type { BookEntry, BookTrade } from '../types/appTypes'; // Импортируем типы
+    availableBooks,
+    activeTrades,
+    findUserById,
+    respondToTradeProposal
+} from '../data/appData';
+import type { BookEntry, BookTrade } from '../types/appTypes';
 
 /**
  * @component UserProfilePage
@@ -20,7 +18,7 @@ import type { BookEntry, BookTrade } from '../types/appTypes'; // Импорти
  * и предложения обмена (входящие и исходящие).
  */
 const UserProfilePage: React.FC = () => {
-    const { activeUser, setActiveUser } = useAuthStatus(); // Текущий авторизованный пользователь и функция его обновления
+    const { activeUser, setActiveUser } = useAuthStatus();
     const navigate = useNavigate();
 
     const [myBooks, setMyBooks] = useState<BookEntry[]>([]);
@@ -31,19 +29,16 @@ const UserProfilePage: React.FC = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
-    // Функция для получения книг пользователя
     const getBooksByOwnerId = (ownerId: string): BookEntry[] => {
         return availableBooks.filter(book => book.currentOwner.id === ownerId);
     };
 
-    // Функция для получения предложений обмена для пользователя
     const getTradeOffersForUser = (userId: string): { incoming: BookTrade[], outgoing: BookTrade[] } => {
         const incoming = activeTrades.filter(trade => trade.recipient.id === userId && trade.status === 'pending');
         const outgoing = activeTrades.filter(trade => trade.initiator.id === userId && trade.status === 'pending');
         return { incoming, outgoing };
     };
 
-    // Эффект для загрузки данных пользователя при монтировании и при изменениях
     useEffect(() => {
         if (activeUser) {
             setMyBooks(getBooksByOwnerId(activeUser.id));
@@ -51,14 +46,14 @@ const UserProfilePage: React.FC = () => {
             setIncomingTrades(incoming);
             setOutgoingTrades(outgoing);
         } else {
-            // Если пользователь не авторизован, перенаправляем на страницу входа
             navigate('/login');
         }
-    }, [activeUser, navigate, availableBooks, activeTrades]); // Зависимости для обновления данных
+    }, [activeUser, navigate, availableBooks, activeTrades]);
 
     /**
      * @function handleTopUpSubmit
-     * @description Обработчик пополнения баланса.
+     * @description Обработчик отправки формы пополнения баланса.
+     * Перенаправляет на страницу оплаты.
      * @param {React.FormEvent} e - Событие формы.
      */
     const handleTopUpSubmit = (e: React.FormEvent) => {
@@ -72,21 +67,12 @@ const UserProfilePage: React.FC = () => {
             return;
         }
         if (amount <= 0 || isNaN(amount)) {
-            setErrorMessage('Пожалуйста, введите корректную сумму для пополнения.');
+            setErrorMessage('Пожалуйста, введите корректную сумму для пополнения (больше 0).');
             return;
         }
 
-        const result = topUpUserBalance(activeUser.id, amount);
-        if (result.success && result.user) { // Исправлено: result.user вместо result.updatedUser
-            // Обновляем пользователя в контексте, чтобы баланс отобразился сразу
-            const { password, ...userToStore } = result.user;
-            setActiveUser(userToStore);
-            setSuccessMessage(result.message);
-            setTopUpAmount('');
-            setShowTopUpForm(false); // Скрываем форму после успешного пополнения
-        } else {
-            setErrorMessage(result.message);
-        }
+        // Перенаправляем на страницу оплаты, передавая сумму через state
+        navigate('/payment', { state: { amount: amount } });
     };
 
     /**
@@ -98,25 +84,17 @@ const UserProfilePage: React.FC = () => {
     const handleTradeResponse = (tradeId: string, response: 'accepted' | 'rejected') => {
         setErrorMessage('');
         setSuccessMessage('');
-        const result = respondToTradeProposal(tradeId, response); // Исправлено: respondToTradeProposal
+        const result = respondToTradeProposal(tradeId, response);
         if (result.success) {
             setSuccessMessage(result.message);
-            // Принудительно обновляем данные, чтобы изменения отобразились
             if (activeUser) {
                 setMyBooks(getBooksByOwnerId(activeUser.id));
                 const { incoming, outgoing } = getTradeOffersForUser(activeUser.id);
                 setIncomingTrades(incoming);
                 setOutgoingTrades(outgoing);
-                // Если пользователь был участником обмена, его баланс мог измениться
-                // или он мог получить новую книгу, поэтому обновляем его в контексте
-                // Здесь нет прямого возврата updatedUser, но activeUser обновится через useEffect
-                // если изменится availableBooks или activeTrades
-                // Если нужно обновить activeUser немедленно, нужно, чтобы respondToTradeProposal возвращал updatedUser
-                // Для текущей имитации, просто пересчитываем данные
                 const updatedUser = findUserById(activeUser.id);
                 if (updatedUser) {
-                    const { password, ...userToStore } = updatedUser;
-                    setActiveUser(userToStore);
+                    setActiveUser(updatedUser);
                 }
             }
         } else {
@@ -132,10 +110,9 @@ const UserProfilePage: React.FC = () => {
     const handleCancelTrade = (tradeId: string) => {
         setErrorMessage('');
         setSuccessMessage('');
-        const result = respondToTradeProposal(tradeId, 'cancelled'); // Исправлено: respondToTradeProposal
+        const result = respondToTradeProposal(tradeId, 'cancelled');
         if (result.success) {
             setSuccessMessage(result.message);
-            // Принудительно обновляем данные
             if (activeUser) {
                 const { incoming, outgoing } = getTradeOffersForUser(activeUser.id);
                 setIncomingTrades(incoming);
@@ -170,7 +147,7 @@ const UserProfilePage: React.FC = () => {
                             required
                             aria-label="Сумма пополнения"
                         />
-                        <button type="submit" className="submit-button">Подтвердить</button>
+                        <button type="submit" className="submit-button">Перейти к оплате</button> {/* Изменено название кнопки */}
                         <button type="button" onClick={() => setShowTopUpForm(false)} className="cancel-button">Отмена</button>
                     </form>
                 )}
@@ -186,7 +163,7 @@ const UserProfilePage: React.FC = () => {
                     <div className="trade-list">
                         {incomingTrades.map(trade => (
                             <div key={trade.id} className="trade-offer-card">
-                                <p><strong>{trade.initiator.name}</strong> хочет обменять свою книгу:</p> {/* Исправлено: initiator вместо proposer */}
+                                <p><strong>{trade.initiator.name}</strong> хочет обменять свою книгу:</p>
                                 <div className="trade-books-display">
                                     <div className="book-item">
                                         <Link to={`/book/${trade.initiatorBook.id}`}>
@@ -218,7 +195,7 @@ const UserProfilePage: React.FC = () => {
                     <div className="trade-list">
                         {outgoingTrades.map(trade => (
                             <div key={trade.id} className="trade-offer-card">
-                                <p>Вы предложили <strong>{trade.recipient.name}</strong> обменять вашу книгу:</p> {/* Исправлено: recipient вместо receiver */}
+                                <p>Вы предложили <strong>{trade.recipient.name}</strong> обменять вашу книгу:</p>
                                 <div className="trade-books-display">
                                     <div className="book-item">
                                         <Link to={`/book/${trade.initiatorBook.id}`}>
@@ -252,7 +229,7 @@ const UserProfilePage: React.FC = () => {
                         {myBooks.map(book => <BookCard key={book.id} book={book} />)}
                     </div>
                 ) : (
-                    <p className="no-content-message">У вас пока нет книг. <Link to="/add-book" className="link-text">Добавить книгу?</Link></p> 
+                    <p className="no-content-message">У вас пока нет книг. <Link to="/add-book" className="link-text">Добавить книгу?</Link></p>
                 )}
             </section>
         </div>

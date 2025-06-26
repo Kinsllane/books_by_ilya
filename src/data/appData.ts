@@ -295,6 +295,7 @@ export const createNewTradeProposal = (initiatorId: string, initiatorBookId: str
         recipient,
         recipientBook,
         status: 'pending'
+        
     };
 
     activeTrades.push(newTrade);
