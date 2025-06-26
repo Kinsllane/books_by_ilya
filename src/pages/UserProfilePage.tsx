@@ -1,0 +1,262 @@
+// src/pages/UserProfilePage.tsx
+
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuthStatus } from '../hooks/useAuthStatus'; // Импортируем наш хук аутентификации
+import BookCard from '../components/books/BookCard'; // Импортируем компонент BookCard
+import {
+    availableBooks, // Для принудительного обновления списка книг
+    activeTrades, // Для принудительного обновления списка обменов
+    retrieveBookById, // Для получения деталей книги по ID
+    findUserById, // Для получения деталей пользователя по ID
+    topUpUserBalance,
+    respondToTradeProposal // Правильное название функции
+} from '../data/appData'; // Импортируем функции для работы с данными
+import type { BookEntry, BookTrade } from '../types/appTypes'; // Импортируем типы
+
+/**
+ * @component UserProfilePage
+ * @description Страница профиля пользователя, отображающая его книги, баланс
+ * и предложения обмена (входящие и исходящие).
+ */
+const UserProfilePage: React.FC = () => {
+    const { activeUser, setActiveUser } = useAuthStatus(); // Текущий авторизованный пользователь и функция его обновления
+    const navigate = useNavigate();
+
+    const [myBooks, setMyBooks] = useState<BookEntry[]>([]);
+    const [incomingTrades, setIncomingTrades] = useState<BookTrade[]>([]);
+    const [outgoingTrades, setOutgoingTrades] = useState<BookTrade[]>([]);
+    const [showTopUpForm, setShowTopUpForm] = useState(false);
+    const [topUpAmount, setTopUpAmount] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
+
+    // Функция для получения книг пользователя
+    const getBooksByOwnerId = (ownerId: string): BookEntry[] => {
+        return availableBooks.filter(book => book.currentOwner.id === ownerId);
+    };
+
+    // Функция для получения предложений обмена для пользователя
+    const getTradeOffersForUser = (userId: string): { incoming: BookTrade[], outgoing: BookTrade[] } => {
+        const incoming = activeTrades.filter(trade => trade.recipient.id === userId && trade.status === 'pending');
+        const outgoing = activeTrades.filter(trade => trade.initiator.id === userId && trade.status === 'pending');
+        return { incoming, outgoing };
+    };
+
+    // Эффект для загрузки данных пользователя при монтировании и при изменениях
+    useEffect(() => {
+        if (activeUser) {
+            setMyBooks(getBooksByOwnerId(activeUser.id));
+            const { incoming, outgoing } = getTradeOffersForUser(activeUser.id);
+            setIncomingTrades(incoming);
+            setOutgoingTrades(outgoing);
+        } else {
+            // Если пользователь не авторизован, перенаправляем на страницу входа
+            navigate('/login');
+        }
+    }, [activeUser, navigate, availableBooks, activeTrades]); // Зависимости для обновления данных
+
+    /**
+     * @function handleTopUpSubmit
+     * @description Обработчик пополнения баланса.
+     * @param {React.FormEvent} e - Событие формы.
+     */
+    const handleTopUpSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        setErrorMessage('');
+        setSuccessMessage('');
+
+        const amount = Number(topUpAmount);
+        if (!activeUser) {
+            setErrorMessage('Пользователь не авторизован.');
+            return;
+        }
+        if (amount <= 0 || isNaN(amount)) {
+            setErrorMessage('Пожалуйста, введите корректную сумму для пополнения.');
+            return;
+        }
+
+        const result = topUpUserBalance(activeUser.id, amount);
+        if (result.success && result.user) { // Исправлено: result.user вместо result.updatedUser
+            // Обновляем пользователя в контексте, чтобы баланс отобразился сразу
+            const { password, ...userToStore } = result.user;
+            setActiveUser(userToStore);
+            setSuccessMessage(result.message);
+            setTopUpAmount('');
+            setShowTopUpForm(false); // Скрываем форму после успешного пополнения
+        } else {
+            setErrorMessage(result.message);
+        }
+    };
+
+    /**
+     * @function handleTradeResponse
+     * @description Обработчик ответа на предложение обмена (принять/отклонить).
+     * @param {string} tradeId - ID предложения обмена.
+     * @param {'accepted' | 'rejected'} response - Ответ на предложение.
+     */
+    const handleTradeResponse = (tradeId: string, response: 'accepted' | 'rejected') => {
+        setErrorMessage('');
+        setSuccessMessage('');
+        const result = respondToTradeProposal(tradeId, response); // Исправлено: respondToTradeProposal
+        if (result.success) {
+            setSuccessMessage(result.message);
+            // Принудительно обновляем данные, чтобы изменения отобразились
+            if (activeUser) {
+                setMyBooks(getBooksByOwnerId(activeUser.id));
+                const { incoming, outgoing } = getTradeOffersForUser(activeUser.id);
+                setIncomingTrades(incoming);
+                setOutgoingTrades(outgoing);
+                // Если пользователь был участником обмена, его баланс мог измениться
+                // или он мог получить новую книгу, поэтому обновляем его в контексте
+                // Здесь нет прямого возврата updatedUser, но activeUser обновится через useEffect
+                // если изменится availableBooks или activeTrades
+                // Если нужно обновить activeUser немедленно, нужно, чтобы respondToTradeProposal возвращал updatedUser
+                // Для текущей имитации, просто пересчитываем данные
+                const updatedUser = findUserById(activeUser.id);
+                if (updatedUser) {
+                    const { password, ...userToStore } = updatedUser;
+                    setActiveUser(userToStore);
+                }
+            }
+        } else {
+            setErrorMessage(result.message);
+        }
+    };
+
+    /**
+     * @function handleCancelTrade
+     * @description Обработчик отмены исходящего предложения обмена.
+     * @param {string} tradeId - ID предложения обмена.
+     */
+    const handleCancelTrade = (tradeId: string) => {
+        setErrorMessage('');
+        setSuccessMessage('');
+        const result = respondToTradeProposal(tradeId, 'cancelled'); // Исправлено: respondToTradeProposal
+        if (result.success) {
+            setSuccessMessage(result.message);
+            // Принудительно обновляем данные
+            if (activeUser) {
+                const { incoming, outgoing } = getTradeOffersForUser(activeUser.id);
+                setIncomingTrades(incoming);
+                setOutgoingTrades(outgoing);
+            }
+        } else {
+            setErrorMessage(result.message);
+        }
+    };
+
+    if (!activeUser) {
+        return <div className="page-message">Загрузка профиля...</div>;
+    }
+
+    return (
+        <div className="profile-page-container">
+            <h1 className="page-title">Профиль пользователя: {activeUser.name}</h1>
+
+            <section className="balance-section">
+                <h2 className="section-title">Баланс: {activeUser.balance}₽</h2>
+                {!showTopUpForm && (
+                    <button onClick={() => setShowTopUpForm(true)} className="action-button primary-button">Пополнить баланс</button>
+                )}
+                {showTopUpForm && (
+                    <form onSubmit={handleTopUpSubmit} className="top-up-form">
+                        <input
+                            type="number"
+                            value={topUpAmount}
+                            onChange={e => setTopUpAmount(e.target.value)}
+                            placeholder="Сумма пополнения"
+                            min="1"
+                            required
+                            aria-label="Сумма пополнения"
+                        />
+                        <button type="submit" className="submit-button">Подтвердить</button>
+                        <button type="button" onClick={() => setShowTopUpForm(false)} className="cancel-button">Отмена</button>
+                    </form>
+                )}
+                {errorMessage && <p className="error-message">{errorMessage}</p>}
+                {successMessage && <p className="success-message">{successMessage}</p>}
+            </section>
+
+            <section className="trades-section">
+                <h2 className="section-title">Предложения обмена</h2>
+
+                <h3>Входящие предложения:</h3>
+                {incomingTrades.length > 0 ? (
+                    <div className="trade-list">
+                        {incomingTrades.map(trade => (
+                            <div key={trade.id} className="trade-offer-card">
+                                <p><strong>{trade.initiator.name}</strong> хочет обменять свою книгу:</p> {/* Исправлено: initiator вместо proposer */}
+                                <div className="trade-books-display">
+                                    <div className="book-item">
+                                        <Link to={`/book/${trade.initiatorBook.id}`}>
+                                            <img src={trade.initiatorBook.coverImageUrl.startsWith('http') ? trade.initiatorBook.coverImageUrl : `/${trade.initiatorBook.coverImageUrl}`} alt={trade.initiatorBook.title} />
+                                        </Link>
+                                        <p>{trade.initiatorBook.title}</p>
+                                    </div>
+                                    <span className="trade-arrow">&harr;</span>
+                                    <div className="book-item">
+                                        <Link to={`/book/${trade.recipientBook.id}`}>
+                                            <img src={trade.recipientBook.coverImageUrl.startsWith('http') ? trade.recipientBook.coverImageUrl : `/${trade.recipientBook.coverImageUrl}`} alt={trade.recipientBook.title} />
+                                        </Link>
+                                        <p>на вашу: {trade.recipientBook.title}</p>
+                                    </div>
+                                </div>
+                                <div className="trade-actions">
+                                    <button onClick={() => handleTradeResponse(trade.id, 'accepted')} className="action-button accept-button">Принять</button>
+                                    <button onClick={() => handleTradeResponse(trade.id, 'rejected')} className="action-button reject-button">Отклонить</button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="no-content-message">Нет входящих предложений обмена.</p>
+                )}
+
+                <h3>Исходящие предложения:</h3>
+                {outgoingTrades.length > 0 ? (
+                    <div className="trade-list">
+                        {outgoingTrades.map(trade => (
+                            <div key={trade.id} className="trade-offer-card">
+                                <p>Вы предложили <strong>{trade.recipient.name}</strong> обменять вашу книгу:</p> {/* Исправлено: recipient вместо receiver */}
+                                <div className="trade-books-display">
+                                    <div className="book-item">
+                                        <Link to={`/book/${trade.initiatorBook.id}`}>
+                                            <img src={trade.initiatorBook.coverImageUrl.startsWith('http') ? trade.initiatorBook.coverImageUrl : `/${trade.initiatorBook.coverImageUrl}`} alt={trade.initiatorBook.title} />
+                                        </Link>
+                                        <p>{trade.initiatorBook.title}</p>
+                                    </div>
+                                    <span className="trade-arrow">&harr;</span>
+                                    <div className="book-item">
+                                        <Link to={`/book/${trade.recipientBook.id}`}>
+                                            <img src={trade.recipientBook.coverImageUrl.startsWith('http') ? trade.recipientBook.coverImageUrl : `/${trade.recipientBook.coverImageUrl}`} alt={trade.recipientBook.title} />
+                                        </Link>
+                                        <p>на: {trade.recipientBook.title}</p>
+                                    </div>
+                                </div>
+                                <div className="trade-actions">
+                                    <button onClick={() => handleCancelTrade(trade.id)} className="action-button cancel-button">Отменить предложение</button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="no-content-message">Нет исходящих предложений обмена.</p>
+                )}
+            </section>
+
+            <section className="my-books-section">
+                <h2 className="section-title">Мои книги</h2>
+                {myBooks.length > 0 ? (
+                    <div className="book-grid">
+                        {myBooks.map(book => <BookCard key={book.id} book={book} />)}
+                    </div>
+                ) : (
+                    <p className="no-content-message">У вас пока нет книг. <Link to="/add-book" className="link-text">Добавить книгу?</Link></p> 
+                )}
+            </section>
+        </div>
+    );
+};
+
+export default UserProfilePage;

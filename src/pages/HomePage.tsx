@@ -1,53 +1,42 @@
-import React from 'react';
-import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
+// src/pages/HomePage.tsx
 
+import React, { useState, useEffect } from 'react';
+import BookCard from '../components/books/BookCard'; // Импортируем компонент BookCard
+import { availableBooks } from '../data/appData'; // Импортируем массив книг из appData
+
+/**
+ * @component HomePage
+ * @description Главная страница приложения, отображающая список всех доступных книг.
+ */
 const HomePage: React.FC = () => {
-  const { isAuthenticated, user } = useAuth();
+    // Используем состояние для книг, чтобы компонент мог перерендериться при изменении данных
+    // (например, после покупки или обмена книги, когда меняется владелец)
+    const [booksToDisplay, setBooksToDisplay] = useState(availableBooks);
 
-  return (
-    <div className="py-12">
-      <h1 className="text-4xl font-bold text-center mb-8">Welcome to Esports Tournaments</h1>
-      
-      <div className="max-w-3xl mx-auto">
-        <p className="text-lg mb-6">
-          Organize and participate in exciting esports tournaments with our double elimination system.
-        </p>
-        
-        {isAuthenticated ? (
-          <div className="bg-blue-100 p-4 rounded-lg">
-            <p className="text-blue-800">
-              Welcome back, {user?.role === 'organizer' ? 'Organizer' : 'Team'} {user?.username}!
-            </p>
-          </div>
-        ) : (
-          <div className="bg-gray-100 p-4 rounded-lg">
-            <p className="text-gray-800">
-              Please login or register to create or join tournaments.
-            </p>
-          </div>
-        )}
-        
-        <div className="mt-12 grid md:grid-cols-3 gap-8">
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-xl font-semibold mb-3">For Organizers</h3>
-            <p>Create tournaments, manage participants, and update results.</p>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-xl font-semibold mb-3">For Teams</h3>
-            <p>Find tournaments, register your team, and compete for prizes.</p>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-xl font-semibold mb-3">Our Services</h3>
-            <p>Check out additional services to enhance your tournament experience.</p>
-            <Link to="/services" className="text-blue-600 hover:underline mt-2 block">Learn more →</Link>
-          </div>
+    // Эффект для обновления списка книг, если availableBooks изменится
+    // В реальном приложении здесь могла бы быть подписка на изменения или более сложный механизм
+    useEffect(() => {
+        setBooksToDisplay(availableBooks);
+    }, [availableBooks]); // Зависимость от availableBooks (хотя это мутируемый массив, React не увидит мутации без нового объекта)
+
+    // Для принудительного обновления при мутации availableBooks (если не создается новый массив)
+    // Можно использовать ключ, основанный на длине массива и ID владельцев, как в оригинале
+    // const bookStateSignature = availableBooks.length + '_' + availableBooks.map(b => b.currentOwner.id).join('');
+
+    return (
+        <div className="home-page-container">
+            <h1 className="page-title">Каталог книг</h1>
+            <div className="book-grid"> {/* Сетка для отображения карточек книг */}
+                {booksToDisplay.length > 0 ? (
+                    booksToDisplay.map(book => (
+                        <BookCard key={book.id} book={book} />
+                    ))
+                ) : (
+                    <p className="no-books-message">Книг пока нет в каталоге.</p>
+                )}
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default HomePage;
