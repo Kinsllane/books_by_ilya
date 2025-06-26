@@ -9,7 +9,8 @@ import type { BookEntry } from '../types/appTypes';
 /**
  * @component EditBookFormPage
  * @description Страница для редактирования существующей книги.
- * Доступна только авторизованным пользователям, являющимся владельцами книги.
+ * Доступна только авторизованным пользователям, являющимся владельцами книги,
+ * или администраторам.
  */
 const EditBookFormPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -41,8 +42,8 @@ const EditBookFormPage: React.FC = () => {
         if (id) {
             const bookToEdit = retrieveBookById(id);
             if (bookToEdit) {
-                // Проверяем, является ли текущий пользователь владельцем книги
-                if (bookToEdit.currentOwner.id !== activeUser.id) {
+                // Проверяем, является ли текущий пользователь владельцем книги ИЛИ администратором
+                if (bookToEdit.currentOwner.id !== activeUser.id && activeUser.role !== 'admin') { // <-- ИЗМЕНЕНИЕ ЗДЕСЬ
                     alert('У вас нет прав для редактирования этой книги.');
                     navigate('/');
                     return;

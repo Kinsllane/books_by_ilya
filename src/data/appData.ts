@@ -15,6 +15,18 @@ const LS_PREFIX = 'bookswap_'; // Префикс для ключей в localSto
 const loadData = <T>(key: string, defaultData: T): T => {
     try {
         const storedData = localStorage.getItem(LS_PREFIX + key);
+        // Дополнительная проверка для UserProfile: убедимся, что поле 'role' присутствует
+        if (key === 'registeredUsers' && storedData) {
+            const parsedData: UserProfile[] = JSON.parse(storedData);
+            // Если у пользователя нет роли, присваиваем 'user' по умолчанию
+            // Также инициализируем avatarUrl и bio, если их нет
+            return parsedData.map(user => ({
+                ...user,
+                role: user.role || 'user',
+                avatarUrl: user.avatarUrl || '/default-avatar.png', // <-- ИНИЦИАЛИЗАЦИЯ АВАТАРА
+                bio: user.bio || '' // <-- ИНИЦИАЛИЗАЦИЯ БИО
+            })) as T;
+        }
         return storedData ? JSON.parse(storedData) : defaultData;
     } catch (error) {
         console.error(`Ошибка загрузки данных из localStorage для ключа ${key}:`, error);
@@ -39,68 +51,22 @@ const saveData = <T>(key: string, data: T) => {
 
 // --- Дефолтные данные для инициализации (если localStorage пуст) ---
 
-// Дефолтные пользователи
+// Дефолтные пользователи - ОСТАВЛЯЕМ ТОЛЬКО АДМИНА
 const DEFAULT_USERS: UserProfile[] = [
-    { id: 'usr-001', name: 'Алиса', password: 'password123', balance: 1000, registrationDate: '2023-01-15', role: 'user' },
-    { id: 'usr-002', name: 'Борис', password: 'password123', balance: 1500, registrationDate: '2023-02-20', role: 'user' },
-    { id: 'usr-003', name: 'Вера', password: 'password123', balance: 800, registrationDate: '2023-03-10', role: 'user' },
-    { id: 'usr-admin', name: 'Админ', password: 'adminpassword', balance: 9999, registrationDate: '2023-01-01', role: 'admin' },
+    {
+        id: 'usr-admin',
+        name: 'Админ',
+        password: 'adminpassword',
+        balance: 9999,
+        registrationDate: '2023-01-01',
+        role: 'admin',
+        avatarUrl: '/default-avatar.png', // <-- ДОБАВЛЕНО
+        bio: 'Главный администратор системы BookSwap.' // <-- ДОБАВЛЕНО
+    },
 ];
 
-// Дефолтные книги (ВАЖНО: currentOwner, reviewer, quoter - это просто объекты с ID,
-// ссылки на реальные UserProfile будут восстановлены ниже)
-const DEFAULT_BOOKS: BookEntry[] = [
-    {
-        id: 'book-001',
-        title: 'Тень Ветра',
-        author: 'Карлос Руис Сафон',
-        description: 'Однажды в туманном рассвете 1945 года мальчик по имени Даниель попадает в таинственное место в сердце старого города — на Кладбище Забытых Книг. Там он находит проклятую книгу, которая изменит всю его жизнь и погрузит его в лабиринт интриг и тайн, скрытых в темной душе города.',
-        coverImageUrl: 'book-cover-1.png',
-        currentOwner: { id: 'usr-001', name: 'Алиса', balance: 0, registrationDate: '', role: 'user' },
-        isForSale: true,
-        isForTrade: true,
-        priceValue: 300,
-        reviews: [
-            { id: 'rev-001', text: 'Захватывающая история, не мог оторваться!', reviewer: { id: 'usr-002', name: 'Борис', balance: 0, registrationDate: '', role: 'user' } },
-        ],
-        quotes: [
-            { id: 'qte-001', text: 'Книги — это зеркала: в них мы видим лишь то, что уже несем в своей душе.', quoter: { id: 'usr-001', name: 'Алиса', balance: 0, registrationDate: '', role: 'user' } },
-        ],
-        publicationYear: 2001
-    },
-    {
-        id: 'book-002',
-        title: 'Дюна',
-        author: 'Фрэнк Герберт',
-        description: 'История Пола Атрейдеса, наследника могущественного дома, которому предстоит бороться за контроль над пустынной планетой Арракис, единственным источником самого ценного вещества во вселенной — пряности.',
-        coverImageUrl: 'book-cover-2.png',
-        currentOwner: { id: 'usr-002', name: 'Борис', balance: 0, registrationDate: '', role: 'user' },
-        isForSale: false,
-        isForTrade: true,
-        reviews: [
-            { id: 'rev-002', text: 'Величайшая научная фантастика всех времен. Обязательно к прочтению.', reviewer: { id: 'usr-003', name: 'Вера', balance: 0, registrationDate: '', role: 'user' } },
-            { id: 'rev-003', text: 'Сложно, но очень интересно.', reviewer: { id: 'usr-001', name: 'Алиса', balance: 0, registrationDate: '', role: 'user' } },
-        ],
-        quotes: [],
-        publicationYear: 1965
-    },
-    {
-        id: 'book-003',
-        title: 'Гордость и Предубеждение',
-        author: 'Джейн Остен',
-        description: 'Классический роман о нравах, воспитании, морали и браке в обществе землевладельцев в Англии начала XIX века. В центре сюжета — отношения между Элизабет Беннет и богатым аристократом Фицуильямом Дарси.',
-        coverImageUrl: 'book-cover-3.png',
-        currentOwner: { id: 'usr-003', name: 'Вера', balance: 0, registrationDate: '', role: 'user' },
-        isForSale: true,
-        isForTrade: false,
-        priceValue: 250,
-        reviews: [],
-        quotes: [
-            { id: 'qte-002', text: 'Всеобщее признание, что одинокий мужчина, обладающий хорошим состоянием, должен нуждаться в жене.', quoter: { id: 'usr-003', name: 'Вера', balance: 0, registrationDate: '', role: 'user' } },
-        ],
-        publicationYear: 1813
-    }
-];
+// Дефолтные книги - УДАЛЯЕМ ВСЕ
+const DEFAULT_BOOKS: BookEntry[] = []; // <-- ПУСТОЙ МАССИВ
 
 // --- Имитация базы данных (хранение в памяти, загрузка из localStorage) ---
 
@@ -110,9 +76,10 @@ export let activeTrades: BookTrade[] = loadData('activeTrades', []);
 
 
 // --- Восстановление ссылок на объекты после загрузки из localStorage ---
-// Это необходимо, потому что JSON.stringify/parse теряет ссылки,
-// и мы хотим, чтобы все BookEntry.currentOwner, BookReview.reviewer и т.д.
-// ссылались на реальные объекты из registeredUsers.
+// Этот блок остается, так как он важен для корректной работы с данными,
+// даже если они загружены из localStorage или созданы динамически.
+// Он гарантирует, что ссылки на UserProfile и BookEntry внутри других структур
+// (например, reviews, quotes, trades) будут корректными объектами, а не просто ID.
 
 // 1. Восстанавливаем ссылки на UserProfile в BookEntry (currentOwner, reviews, quotes)
 availableBooks.forEach(book => {
@@ -121,10 +88,9 @@ availableBooks.forEach(book => {
     if (owner) {
         book.currentOwner = owner;
     } else {
-        // Если владелец не найден (например, удален), можно назначить первого пользователя
-        // или удалить книгу, или пометить как "без владельца".
-        console.warn(`Владелец книги "${book.title}" (ID: ${book.id}) не найден. Назначаем первого пользователя.`);
-        book.currentOwner = registeredUsers[0]; // Назначаем первого пользователя по умолчанию
+        // Если владелец не найден (например, удален), назначаем первого пользователя (админа)
+        console.warn(`Владелец книги "${book.title}" (ID: ${book.id}) не найден. Назначаем первого пользователя (админа).`);
+        book.currentOwner = registeredUsers[0]; // Назначаем первого пользователя по умолчанию (это будет админ)
     }
 
     // reviews.reviewer
@@ -239,7 +205,9 @@ export const registerNewUser = (username: string, password_raw: string): UserPro
         password: password_raw,
         balance: 500, // Начальный баланс
         registrationDate: new Date().toISOString().split('T')[0], // Текущая дата
-        role: 'user' // по умолчанию новый пользователь - обычный пользователь
+        role: 'user', // по умолчанию новый пользователь - обычный пользователь
+        avatarUrl: '/default-avatar.png', // <-- ИНИЦИАЛИЗАЦИЯ АВАТАРА
+        bio: '' // <-- ИНИЦИАЛИЗАЦИЯ БИО
     };
     registeredUsers.push(newUser);
     saveData('registeredUsers', registeredUsers); // Сохраняем изменения
@@ -267,6 +235,26 @@ export const topUpUserBalance = (userId: string, amount: number): { success: boo
 };
 
 /**
+ * @function updateUserProfile
+ * @description Обновляет информацию профиля пользователя (аватар, био).
+ * @param {string} userId - ID пользователя, чей профиль обновляется.
+ * @param {Partial<UserProfile>} updates - Объект с обновляемыми полями (avatarUrl, bio).
+ * @returns {{ success: boolean, message: string, user?: UserProfile }} Результат операции.
+ */
+export const updateUserProfile = (userId: string, updates: Partial<UserProfile>): { success: boolean, message: string, user?: UserProfile } => {
+    const userIndex = registeredUsers.findIndex(user => user.id === userId);
+    if (userIndex === -1) {
+        return { success: false, message: "Пользователь не найден." };
+    }
+
+    const user = registeredUsers[userIndex];
+    registeredUsers[userIndex] = { ...user, ...updates }; // Применяем обновления
+    saveData('registeredUsers', registeredUsers); // Сохраняем изменения
+    return { success: true, message: "Профиль успешно обновлен.", user: registeredUsers[userIndex] };
+};
+
+
+/**
  * @function deleteUser
  * @description Удаляет пользователя из системы.
  * @param {string} userIdToDelete - ID пользователя, которого нужно удалить.
@@ -290,8 +278,12 @@ export const deleteUser = (userIdToDelete: string, adminId: string): { success: 
 
     const userToDelete = registeredUsers[userIndex];
 
-    // Переназначаем книги удаляемого пользователя первому админу или дефолтному пользователю
-    const defaultOwner = registeredUsers.find(u => u.role === 'admin') || registeredUsers[0];
+    // Переназначаем книги удаляемого пользователя первому админу (который всегда есть)
+    const defaultOwner = registeredUsers.find(u => u.role === 'admin'); // Ищем админа
+    if (!defaultOwner) { // Этого не должно произойти, если админ всегда есть
+        return { success: false, message: "Ошибка: Администратор для переназначения книг не найден." };
+    }
+
     availableBooks.forEach(book => {
         if (book.currentOwner.id === userToDelete.id) {
             book.currentOwner = defaultOwner;
@@ -411,7 +403,7 @@ export const deleteBook = (bookId: string, userId: string): { success: boolean, 
     const actingUser = findUserById(userId); // Получаем объект пользователя, который пытается удалить
 
     // Проверяем права: либо владелец, либо администратор
-    if (!actingUser || (bookToDelete.currentOwner.id !== userId && actingUser.role !== 'admin')) { // <-- ИЗМЕНЕНО
+    if (!actingUser || (bookToDelete.currentOwner.id !== userId && actingUser.role !== 'admin')) {
         return { success: false, message: "У вас нет прав для удаления этой книги." };
     }
 

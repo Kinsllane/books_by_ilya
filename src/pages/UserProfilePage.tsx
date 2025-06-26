@@ -9,14 +9,15 @@ import {
     activeTrades,
     findUserById,
     respondToTradeProposal,
-    deleteBook
+    deleteBook,
+    updateUserProfile // <-- НОВЫЙ ИМПОРТ
 } from '../data/appData';
-import type { BookEntry, BookTrade } from '../types/appTypes';
+import type { BookEntry, BookTrade, UserProfile } from '../types/appTypes';
 
 /**
  * @component UserProfilePage
- * @description Страница профиля пользователя, отображающая его книги, баланс
- * и предложения обмена (входящие и исходящие).
+ * @description Страница профиля пользователя, отображающая его книги, баланс,
+ * предложения обмена (входящие и исходящие), а также позволяющая редактировать профиль.
  */
 const UserProfilePage: React.FC = () => {
     const { activeUser, setActiveUser } = useAuthStatus();
@@ -29,6 +30,13 @@ const UserProfilePage: React.FC = () => {
     const [topUpAmount, setTopUpAmount] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
+
+    // Состояния для редактирования профиля
+    const [isEditingProfile, setIsEditingProfile] = useState(false);
+    const [newBio, setNewBio] = useState(activeUser?.bio || '');
+    const [newAvatarDataUrl, setNewAvatarDataUrl] = useState<string | null>(activeUser?.avatarUrl || null);
+    const [selectedAvatarFile, setSelectedAvatarFile] = useState<File | null>(null);
+
 
     const getBooksByOwnerId = (ownerId: string): BookEntry[] => {
         return availableBooks.filter(book => book.currentOwner.id === ownerId);
@@ -46,6 +54,9 @@ const UserProfilePage: React.FC = () => {
             const { incoming, outgoing } = getTradeOffersForUser(activeUser.id);
             setIncomingTrades(incoming);
             setOutgoingTrades(outgoing);
+            // Обновляем состояния формы редактирования при изменении activeUser
+            setNewBio(activeUser.bio || '');
+            setNewAvatarDataUrl(activeUser.avatarUrl || null);
         } else {
             navigate('/login');
         }
@@ -151,6 +162,72 @@ const UserProfilePage: React.FC = () => {
         }
     };
 
+    /**
+     * @function handleAvatarFileChange
+     * @description Обработчик изменения файла аватара.
+     * Читает выбранный файл как Data URL.
+     * @param {React.ChangeEvent<HTMLInputElement>} e - Событие изменения файла.
+     */
+    const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Пожалуйста, выберите файл изображения (PNG, JPG, JPEG, GIF).');
+                setNewAvatarDataUrl(activeUser?.avatarUrl || null); // Возвращаем старый аватар
+                setSelectedAvatarFile(null);
+                return;
+            }
+
+            setSelectedAvatarFile(file); // Сохраняем файл для последующей обработки
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setNewAvatarDataUrl(reader.result as string);
+            };
+            reader.onerror = () => {
+                alert('Не удалось прочитать файл.');
+                setNewAvatarDataUrl(activeUser?.avatarUrl || null);
+                setSelectedAvatarFile(null);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            setNewAvatarDataUrl(activeUser?.avatarUrl || null); // Если файл не выбран, возвращаем старый
+            setSelectedAvatarFile(null);
+        }
+    };
+
+    /**
+     * @function handleProfileSave
+     * @description Обработчик сохранения изменений профиля.
+     */
+    const handleProfileSave = () => {
+        if (!activeUser) return;
+
+        setErrorMessage('');
+        setSuccessMessage('');
+
+        const updates: Partial<UserProfile> = {
+            bio: newBio.trim()
+        };
+
+        // Если выбран новый файл аватара, используем его Data URL
+        if (newAvatarDataUrl) {
+            updates.avatarUrl = newAvatarDataUrl;
+        } else if (activeUser.avatarUrl) {
+            // Если аватар был, но его удалили (или не выбрали новый), можно сбросить на дефолтный
+            updates.avatarUrl = '/default-avatar.png';
+        }
+
+
+        const result = updateUserProfile(activeUser.id, updates);
+        if (result.success && result.user) {
+            setActiveUser(result.user); // Обновляем пользователя в контексте
+            setSuccessMessage('Профиль успешно обновлен!');
+            setIsEditingProfile(false); // Выходим из режима редактирования
+        } else {
+            setErrorMessage(result.message || 'Ошибка при обновлении профиля.');
+        }
+    };
+
     // Вспомогательная функция для определения пути к обложке
     const getCoverPath = (imageUrl: string): string => {
         // Если это Data URL или внешний URL, используем его напрямую.
@@ -168,10 +245,73 @@ const UserProfilePage: React.FC = () => {
 
     return (
         <div className="profile-page-container">
-            <h1 className="page-title">Профиль пользователя: {activeUser.name}</h1>
+            <div className="profile-header-section">
+                <div className="profile-avatar-wrapper">
+                    <img
+                        src={activeUser.avatarUrl || '/default-avatar.png'}
+                        alt={`${activeUser.name}'s avatar`}
+                        className="profile-avatar"
+                    />
+                </div>
+                <div className="profile-info-main">
+                    <h1 className="profile-name">{activeUser.name}</h1>
+                    <p className="profile-role">Роль: {activeUser.role === 'admin' ? 'Администратор' : 'Пользователь'}</p>
+                    <p className="profile-balance">Баланс: <strong>{activeUser.balance}₽</strong></p>
+                    <p className="profile-registration-date">Зарегистрирован: {activeUser.registrationDate}</p>
+                    <div className="profile-bio">
+                        <h3>О себе:</h3>
+                        <p>{activeUser.bio || 'Пользователь пока не добавил информацию о себе.'}</p>
+                    </div>
+                    <button onClick={() => setIsEditingProfile(true)} className="action-button primary-button edit-profile-button">
+                        Редактировать профиль
+                    </button>
+                </div>
+            </div>
+
+            {isEditingProfile && (
+                <div className="profile-edit-form form-container">
+                    <h3>Редактировать профиль</h3>
+                    {errorMessage && <p className="error-message">{errorMessage}</p>}
+                    {successMessage && <p className="success-message">{successMessage}</p>}
+
+                    <div className="form-group">
+                        <label htmlFor="avatarUpload">Изменить аватар:</label>
+                        <input
+                            type="file"
+                            id="avatarUpload"
+                            accept="image/*"
+                            onChange={handleAvatarFileChange}
+                            aria-label="Загрузить новый аватар"
+                        />
+                        {newAvatarDataUrl && (
+                            <div className="avatar-preview">
+                                <p>Предпросмотр аватара:</p>
+                                <img src={newAvatarDataUrl} alt="Предпросмотр аватара" style={{ maxWidth: '100px', maxHeight: '100px', borderRadius: '50%', marginTop: '10px', border: '1px solid #ddd' }} />
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="bio">Биография:</label>
+                        <textarea
+                            id="bio"
+                            value={newBio}
+                            onChange={(e) => setNewBio(e.target.value)}
+                            placeholder="Расскажите немного о себе..."
+                            rows={4}
+                            aria-label="Биография пользователя"
+                        />
+                    </div>
+
+                    <div className="form-actions">
+                        <button onClick={handleProfileSave} className="submit-button">Сохранить</button>
+                        <button onClick={() => setIsEditingProfile(false)} className="cancel-button">Отмена</button>
+                    </div>
+                </div>
+            )}
 
             <section className="balance-section">
-                <h2 className="section-title">Баланс: {activeUser.balance}₽</h2>
+                <h2 className="section-title">Управление балансом</h2>
                 {!showTopUpForm && (
                     <button onClick={() => setShowTopUpForm(true)} className="action-button primary-button">Пополнить баланс</button>
                 )}
@@ -206,7 +346,6 @@ const UserProfilePage: React.FC = () => {
                                 <div className="trade-books-display">
                                     <div className="book-item">
                                         <Link to={`/book/${trade.initiatorBook.id}`}>
-                                            {/* ИЗМЕНЕНО: Используем getCoverPath */}
                                             <img src={getCoverPath(trade.initiatorBook.coverImageUrl)} alt={trade.initiatorBook.title} />
                                         </Link>
                                         <p>{trade.initiatorBook.title}</p>
@@ -214,7 +353,6 @@ const UserProfilePage: React.FC = () => {
                                     <span className="trade-arrow">&harr;</span>
                                     <div className="book-item">
                                         <Link to={`/book/${trade.recipientBook.id}`}>
-                                            {/* ИЗМЕНЕНО: Используем getCoverPath */}
                                             <img src={getCoverPath(trade.recipientBook.coverImageUrl)} alt={trade.recipientBook.title} />
                                         </Link>
                                         <p>на вашу: {trade.recipientBook.title}</p>
@@ -240,7 +378,6 @@ const UserProfilePage: React.FC = () => {
                                 <div className="trade-books-display">
                                     <div className="book-item">
                                         <Link to={`/book/${trade.initiatorBook.id}`}>
-                                            {/* ИЗМЕНЕНО: Используем getCoverPath */}
                                             <img src={getCoverPath(trade.initiatorBook.coverImageUrl)} alt={trade.initiatorBook.title} />
                                         </Link>
                                         <p>{trade.initiatorBook.title}</p>
@@ -248,7 +385,6 @@ const UserProfilePage: React.FC = () => {
                                     <span className="trade-arrow">&harr;</span>
                                     <div className="book-item">
                                         <Link to={`/book/${trade.recipientBook.id}`}>
-                                            {/* ИЗМЕНЕНО: Используем getCoverPath */}
                                             <img src={getCoverPath(trade.recipientBook.coverImageUrl)} alt={trade.recipientBook.title} />
                                         </Link>
                                         <p>на: {trade.recipientBook.title}</p>

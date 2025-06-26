@@ -1,38 +1,49 @@
 // src/pages/HomePage.tsx
 
 import React, { useState, useEffect } from 'react';
-import BookCard from '../components/books/BookCard'; // Импортируем компонент BookCard
-import { availableBooks } from '../data/appData'; // Импортируем массив книг из appData
+import BookCard from '../components/books/BookCard';
+import { availableBooks } from '../data/appData';
 
 /**
  * @component HomePage
- * @description Главная страница приложения, отображающая список всех доступных книг.
+ * @description Главная страница приложения, отображающая список всех доступных книг с возможностью поиска.
  */
 const HomePage: React.FC = () => {
-    // Используем состояние для книг, чтобы компонент мог перерендериться при изменении данных
-    // (например, после покупки или обмена книги, когда меняется владелец)
     const [booksToDisplay, setBooksToDisplay] = useState(availableBooks);
+    const [searchTerm, setSearchTerm] = useState('');
 
-    // Эффект для обновления списка книг, если availableBooks изменится
-    // В реальном приложении здесь могла бы быть подписка на изменения или более сложный механизм
+    // Эффект для обновления списка книг и применения фильтрации
     useEffect(() => {
-        setBooksToDisplay(availableBooks);
-    }, [availableBooks]); // Зависимость от availableBooks (хотя это мутируемый массив, React не увидит мутации без нового объекта)
-
-    // Для принудительного обновления при мутации availableBooks (если не создается новый массив)
-    // Можно использовать ключ, основанный на длине массива и ID владельцев, как в оригинале
-    // const bookStateSignature = availableBooks.length + '_' + availableBooks.map(b => b.currentOwner.id).join('');
+        // Фильтруем книги на основе поискового запроса (только по названию)
+        const filteredBooks = availableBooks.filter(book =>
+            book.title.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        setBooksToDisplay(filteredBooks);
+    }, [searchTerm, availableBooks]); // Зависимости: поисковый запрос и массив всех книг
 
     return (
         <div className="home-page-container">
             <h1 className="page-title">Каталог книг</h1>
-            <div className="book-grid"> {/* Сетка для отображения карточек книг */}
+
+            {/* Поле поиска */}
+            <div className="search-bar">
+                <input
+                    type="text"
+                    placeholder="Поиск по названию книги..." // <-- ИЗМЕНЕН ТЕКСТ ПЛЕЙСХОЛДЕРА
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    aria-label="Поиск книг"
+                />
+            </div>
+            {/* Поле поиска */}
+
+            <div className="book-grid">
                 {booksToDisplay.length > 0 ? (
                     booksToDisplay.map(book => (
                         <BookCard key={book.id} book={book} />
                     ))
                 ) : (
-                    <p className="no-books-message">Книг пока нет в каталоге.</p>
+                    <p className="no-books-message">Книг по вашему запросу не найдено.</p>
                 )}
             </div>
         </div>

@@ -1582,3 +1582,431 @@
         max-width: 100%; /* Полная ширина на очень маленьких экранах */
     }
 }
+/* src/styles/main.css */
+
+/* ... (весь предыдущий код CSS) ... */
+
+/* --- Стили для поля поиска --- */
+.search-bar {
+    margin-bottom: calc(var(--spacing-unit) * 3); /* Отступ снизу */
+    text-align: center; /* Центрируем поле поиска */
+}
+
+.search-bar input {
+    width: 100%;
+    max-width: 500px; /* Ограничиваем ширину */
+    padding: 12px 20px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1.1rem;
+    font-family: var(--font-family-base);
+    color: var(--text-color);
+    background-color: var(--card-background);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-bar input:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(var(--accent-color), 0.2);
+    outline: none;
+}
+
+/* Адаптивность для поля поиска */
+@media (max-width: 768px) {
+    .search-bar input {
+        font-size: 1rem;
+        padding: 10px 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .search-bar {
+        margin-bottom: calc(var(--spacing-unit) * 2);
+    }
+    .search-bar input {
+        font-size: 0.9rem;
+        padding: 8px 12px;
+    }
+}
+/* ===== Обновленный стиль для личного кабинета ===== */
+.profile-page-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Шапка профиля */
+.profile-header-section {
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.profile-avatar-wrapper {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 5px solid #4a6fa5;
+    box-shadow: 0 6px 15px rgba(74, 111, 165, 0.2);
+    transition: all 0.3s ease;
+}
+
+.profile-avatar-wrapper:hover {
+    transform: scale(1.03);
+    box-shadow: 0 8px 20px rgba(74, 111, 165, 0.3);
+}
+
+.profile-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-info-main {
+    flex: 1;
+}
+
+.profile-name {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.profile-role {
+    font-size: 1.1rem;
+    color: #7f8c8d;
+    margin-bottom: 1rem;
+}
+
+.profile-balance {
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+}
+
+.profile-balance strong {
+    color: #27ae60;
+    font-weight: 600;
+}
+
+.profile-registration-date {
+    font-size: 0.95rem;
+    color: #95a5a6;
+}
+
+/* Биография */
+.profile-bio {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #f1f1f1;
+}
+
+.profile-bio h3 {
+    font-size: 1.5rem;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.profile-bio p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: #34495e;
+}
+
+/* Секции */
+.section-title {
+    font-size: 1.8rem;
+    color: #4a6fa5;
+    margin: 3rem 0 1.5rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 2px solid #f1f1f1;
+}
+
+/* Баланс */
+.balance-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9f5ff 100%);
+    border-radius: 10px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.top-up-form {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.top-up-form input {
+    padding: 0.8rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    width: 200px;
+    transition: all 0.3s;
+}
+
+.top-up-form input:focus {
+    border-color: #4a6fa5;
+    box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
+}
+
+/* Предложения обмена */
+.trades-section {
+    margin-top: 3rem;
+}
+
+.trade-offer-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.trade-offer-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.trade-books-display {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin: 1.5rem 0;
+    flex-wrap: wrap;
+}
+
+.trade-books-display .book-item {
+    flex: 0 1 160px;
+    text-align: center;
+}
+
+.trade-books-display .book-item img {
+    width: 100px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 6px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s;
+}
+
+.trade-books-display .book-item img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.trade-arrow {
+    font-size: 2rem;
+    color: #4a6fa5;
+    margin: 0 1rem;
+}
+
+.trade-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+/* Мои книги */
+.my-books-section {
+    margin-top: 3rem;
+}
+
+.my-books-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+/* Кнопки */
+.action-button {
+    padding: 0.7rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+}
+
+.action-button.accept-btn {
+    background-color: #27ae60;
+    color: white;
+}
+
+.action-button.reject-btn {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.action-button.cancel-btn {
+    background-color: #95a5a6;
+    color: white;
+}
+
+.action-button:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .profile-header-section {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+    }
+    
+    .profile-avatar-wrapper {
+        width: 140px;
+        height: 140px;
+    }
+    
+    .trade-books-display {
+        flex-direction: column;
+    }
+    
+    .trade-arrow {
+        transform: rotate(90deg);
+        margin: 1rem 0;
+    }
+    
+    .my-books-list {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-page-container {
+        padding: 1.5rem;
+    }
+    
+    .profile-name {
+        font-size: 2rem;
+    }
+    
+    .top-up-form {
+        flex-direction: column;
+    }
+    
+    .top-up-form input {
+        width: 100%;
+    }
+    
+    .trade-actions {
+        flex-direction: column;
+    }
+    
+    .action-button {
+        width: 100%;
+    }
+}
+
+/* src/styles/main.css */
+
+/* ... (весь предыдущий код CSS) ... */
+
+/* Стили для обертки карточки книги и кнопок в админке */
+.admin-book-card-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-unit); /* Отступ между карточкой и блоком кнопок */
+    align-items: center; /* Центрируем блок кнопок под карточкой */
+}
+
+.admin-book-card-wrapper .book-card {
+    width: 100%;
+}
+
+.admin-book-actions { /* <-- НОВЫЙ СТИЛЬ: Контейнер для кнопок редактирования и удаления */
+    display: flex;
+    gap: var(--spacing-unit); /* Отступ между кнопками */
+    width: 100%; /* Занимает всю ширину родителя */
+    justify-content: center; /* Центрируем кнопки внутри контейнера */
+    flex-wrap: wrap; /* Для адаптивности, чтобы кнопки переносились */
+}
+
+.admin-book-actions .action-button { /* Общие стили для кнопок внутри этого контейнера */
+    flex: 1; /* Кнопки будут занимать равное пространство */
+    min-width: 100px; /* Минимальная ширина для каждой кнопки */
+    max-width: 120px; /* Максимальная ширина для каждой кнопки */
+    padding: calc(var(--spacing-unit) * 0.8) calc(var(--spacing-unit) * 1.2);
+    font-size: 0.9rem;
+    margin-top: 0; /* Убираем лишний отступ, так как gap уже есть */
+}
+
+/* Стили для конкретных кнопок, если нужно переопределить */
+.edit-book-button {
+    /* Можно добавить специфичные стили, если primary-button недостаточно */
+}
+
+.delete-book-button {
+    /* Можно добавить специфичные стили, если reject-button недостаточно */
+}
+
+
+/* Адаптивность для AdminDashboardPage */
+@media (max-width: 768px) {
+    .admin-section {
+        padding: calc(var(--spacing-unit) * 2);
+    }
+
+    .admin-section h3 {
+        font-size: 1.5rem;
+    }
+
+    .user-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-unit);
+    }
+
+    .user-item span {
+        margin-right: 0;
+    }
+
+    .user-item .action-button {
+        width: 100%;
+        max-width: 150px;
+    }
+
+    .admin-book-actions {
+        flex-direction: column; /* Кнопки будут располагаться друг под другом на мобильных */
+        max-width: 250px; /* Ограничиваем ширину блока кнопок */
+    }
+
+    .admin-book-actions .action-button {
+        max-width: 100%; /* Кнопки занимают всю ширину контейнера */
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-section {
+        padding: calc(var(--spacing-unit) * 1.5);
+    }
+
+    .admin-section h3 {
+        font-size: 1.3rem;
+    }
+
+    .user-item {
+        font-size: 1rem;
+    }
+
+    .admin-book-actions {
+        max-width: 100%; /* Полная ширина на очень маленьких экранах */
+    }
+}

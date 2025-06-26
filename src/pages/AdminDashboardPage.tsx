@@ -1,23 +1,25 @@
 // src/pages/AdminDashboardPage.tsx
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // <-- Убедитесь, что Link импортирован
 import { useAuthStatus } from '../hooks/useAuthStatus';
-import { registeredUsers, deleteUser, availableBooks, deleteBook } from '../data/appData'; // <-- ДОБАВЛЕН deleteBook
+import { registeredUsers, deleteUser, availableBooks, deleteBook } from '../data/appData';
 import BookCard from '../components/books/BookCard';
 
 /**
  * @component AdminDashboardPage
  * @description Страница административной панели.
  * Доступна только пользователям с ролью 'admin'.
- * Позволяет управлять пользователями (удалять) и просматривать/удалять книги.
+ * Позволяет управлять пользователями (удалять) и просматривать/удалять книги с поиском.
  */
 const AdminDashboardPage: React.FC = () => {
     const navigate = useNavigate();
     const { activeUser } = useAuthStatus();
 
     const [users, setUsers] = useState(registeredUsers);
-    const [books, setBooks] = useState(availableBooks);
+    const [books, setBooks] = useState(availableBooks); // Все книги
+    const [filteredBooks, setFilteredBooks] = useState(availableBooks); // Отфильтрованные книги для отображения
+    const [searchTerm, setSearchTerm] = useState('');
     const [message, setMessage] = useState('');
 
     useEffect(() => {
@@ -27,8 +29,14 @@ const AdminDashboardPage: React.FC = () => {
             return;
         }
         setUsers([...registeredUsers]);
-        setBooks([...availableBooks]);
-    }, [activeUser, navigate, registeredUsers, availableBooks]);
+        // Обновляем и фильтруем книги при изменении данных или поискового запроса
+        const currentBooks = [...availableBooks]; // Получаем актуальный список
+        const filtered = currentBooks.filter(book =>
+            book.title.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        setBooks(currentBooks); // Обновляем полный список (если он изменился)
+        setFilteredBooks(filtered); // Обновляем отфильтрованный список
+    }, [activeUser, navigate, registeredUsers, availableBooks, searchTerm]);
 
     /**
      * @function handleDeleteUser
@@ -43,7 +51,13 @@ const AdminDashboardPage: React.FC = () => {
             setMessage(result.message);
             if (result.success) {
                 setUsers([...registeredUsers]);
-                setBooks([...availableBooks]); // Обновляем книги, так как владельцы могли измениться
+                // После удаления пользователя, книги могли быть переназначены, поэтому обновляем их
+                const currentBooks = [...availableBooks];
+                const filtered = currentBooks.filter(book =>
+                    book.title.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+                setBooks(currentBooks);
+                setFilteredBooks(filtered);
             }
         }
     };
@@ -53,14 +67,20 @@ const AdminDashboardPage: React.FC = () => {
      * @description Обработчик удаления книги.
      * @param {string} bookId - ID книги для удаления.
      */
-    const handleDeleteBook = (bookId: string) => { // <-- НОВАЯ ФУНКЦИЯ
+    const handleDeleteBook = (bookId: string) => {
         if (!activeUser) return;
 
         if (window.confirm('Вы уверены, что хотите удалить эту книгу? Это действие необратимо.')) {
-            const result = deleteBook(bookId, activeUser.id); // Вызываем функцию deleteBook
+            const result = deleteBook(bookId, activeUser.id);
             setMessage(result.message);
             if (result.success) {
-                setBooks([...availableBooks]); // Обновляем список книг
+                // После удаления книги, обновляем отфильтрованный список
+                const currentBooks = [...availableBooks];
+                const filtered = currentBooks.filter(book =>
+                    book.title.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+                setBooks(currentBooks);
+                setFilteredBooks(filtered);
             }
         }
     };
@@ -95,19 +115,44 @@ const AdminDashboardPage: React.FC = () => {
 
             <section className="admin-section mt-4">
                 <h3>Управление книгами</h3>
-                <p className="info-message">Администратор может редактировать любую книгу, перейдя на её страницу деталей и нажав "Редактировать".</p>
+                <p className="info-message">Администратор может редактировать любую книгу, а так же удалять их.</p>
+                
+                {/* Поле поиска для книг в админке */}
+                <div className="search-bar mb-3">
+                    <input
+                        type="text"
+                        placeholder="Поиск книг по названию..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        aria-label="Поиск книг в админ-панели"
+                    />
+                </div>
+                {/* Поле поиска для книг в админке */}
+
                 <div className="book-grid">
-                    {books.map(book => (
-                        <div key={book.id} className="admin-book-card-wrapper"> {/* <-- НОВАЯ ОБЕРТКА */}
-                            <BookCard book={book} />
-                            <button
-                                onClick={() => handleDeleteBook(book.id)}
-                                className="action-button reject-button delete-book-button" // <-- КНОПКА УДАЛЕНИЯ КНИГИ
-                            >
-                                Удалить книгу
-                            </button>
-                        </div>
-                    ))}
+                    {filteredBooks.length > 0 ? (
+                        filteredBooks.map(book => (
+                            <div key={book.id} className="admin-book-card-wrapper">
+                                <BookCard book={book} />
+                                <div className="admin-book-actions"> {/* <-- НОВЫЙ DIV ДЛЯ КНОПОК */}
+                                    <Link
+                                        to={`/edit-book/${book.id}`}
+                                        className="action-button primary-button edit-book-button" // <-- КНОПКА РЕДАКТИРОВАНИЯ
+                                    >
+                                        Редактировать
+                                    </Link>
+                                    <button
+                                        onClick={() => handleDeleteBook(book.id)}
+                                        className="action-button reject-button delete-book-button"
+                                    >
+                                        Удалить
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="no-books-message">Книг по вашему запросу не найдено.</p>
+                    )}
                 </div>
             </section>
         </div>
