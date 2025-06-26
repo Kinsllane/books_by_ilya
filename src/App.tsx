@@ -14,26 +14,20 @@ import ProposeTradePage from './pages/ProposeTradePage';
 import UserProfilePage from './pages/UserProfilePage';
 import AuthWrapper from './components/auth/AuthWrapper';
 import PaymentPage from './pages/PaymentPage';
-import AdminDashboardPage from './pages/AdminDashboardPage'; // <-- НОВЫЙ ИМПОРТ
+import AdminDashboardPage from './pages/AdminDashboardPage';
 
-/**
- * @component App
- * @description Главный компонент приложения, отвечающий за маршрутизацию
- * и общую структуру страниц.
- */
 const App: React.FC = () => {
     return (
         <div className="app-container">
             <AppHeader />
             <main className="app-main-content">
                 <Routes>
-                    {/* Публичные маршруты */}
                     <Route path="/" element={<HomePage />} />
                     <Route path="/book/:id" element={<BookDetailsPage />} />
                     <Route path="/login" element={<UserLoginPage />} />
                     <Route path="/register" element={<UserRegisterPage />} />
+                    <Route path="/user-profile/:id" element={<UserProfilePage />} /> {/* <-- НОВЫЙ МАРШРУТ */}
 
-                    {/* Защищенные маршруты (требуют аутентификации) */}
                     <Route
                         path="/add-book"
                         element={
@@ -74,7 +68,7 @@ const App: React.FC = () => {
                             </AuthWrapper>
                         }
                     />
-                    <Route // <-- НОВЫЙ МАРШРУТ ДЛЯ АДМИН-ПАНЕЛИ
+                    <Route
                         path="/admin-dashboard"
                         element={
                             <AuthWrapper>
@@ -83,7 +77,6 @@ const App: React.FC = () => {
                         }
                     />
 
-                    {/* Маршрут для необнаруженных страниц (404) */}
                     <Route path="*" element={<h1 className="page-title">404: Страница не найдена</h1>} />
                 </Routes>
             </main>

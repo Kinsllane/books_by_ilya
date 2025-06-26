@@ -1,23 +1,14 @@
-// src/pages/EditBookFormPage.tsx
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuthStatus } from '../hooks/useAuthStatus';
 import { retrieveBookById, updateBook } from '../data/appData';
 import type { BookEntry } from '../types/appTypes';
 
-/**
- * @component EditBookFormPage
- * @description Страница для редактирования существующей книги.
- * Доступна только авторизованным пользователям, являющимся владельцами книги,
- * или администраторам.
- */
 const EditBookFormPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { activeUser } = useAuthStatus();
 
-    // Состояния для полей формы
     const [title, setTitle] = useState('');
     const [author, setAuthor] = useState('');
     const [description, setDescription] = useState('');
@@ -29,7 +20,6 @@ const EditBookFormPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [bookNotFound, setBookNotFound] = useState(false);
 
-    // НОВОЕ СОСТОЯНИЕ: для хранения выбранного файла обложки
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
     useEffect(() => {
@@ -42,18 +32,16 @@ const EditBookFormPage: React.FC = () => {
         if (id) {
             const bookToEdit = retrieveBookById(id);
             if (bookToEdit) {
-                // Проверяем, является ли текущий пользователь владельцем книги ИЛИ администратором
                 if (bookToEdit.currentOwner.id !== activeUser.id && activeUser.role !== 'admin') { // <-- ИЗМЕНЕНИЕ ЗДЕСЬ
                     alert('У вас нет прав для редактирования этой книги.');
                     navigate('/');
                     return;
                 }
 
-                // Предзаполняем форму данными книги
                 setTitle(bookToEdit.title);
                 setAuthor(bookToEdit.author);
                 setDescription(bookToEdit.description);
-                setCoverImageUrl(bookToEdit.coverImageUrl); // Устанавливаем текущий URL обложки
+                setCoverImageUrl(bookToEdit.coverImageUrl); 
                 setIsForSale(bookToEdit.isForSale);
                 setPriceValue(bookToEdit.priceValue ? String(bookToEdit.priceValue) : '');
                 setIsForTrade(bookToEdit.isForTrade);
@@ -68,35 +56,21 @@ const EditBookFormPage: React.FC = () => {
             setLoading(false);
         }
     }, [id, activeUser, navigate]);
-
-    /**
-     * @function handleFileChange
-     * @description Обработчик изменения файла обложки.
-     * Читает выбранный файл и преобразует его в Data URL.
-     * @param {React.ChangeEvent<HTMLInputElement>} e - Событие изменения input file.
-     */
+    
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            setSelectedFile(file); // Сохраняем файл в состоянии
+            setSelectedFile(file); 
             const reader = new FileReader();
             reader.onloadend = () => {
-                // Когда файл прочитан, устанавливаем его как coverImageUrl
                 setCoverImageUrl(reader.result as string);
             };
-            reader.readAsDataURL(file); // Читаем файл как Data URL
+            reader.readAsDataURL(file); 
         } else {
             setSelectedFile(null);
-            // Если файл не выбран, можно очистить coverImageUrl или оставить текущий
-            // setCoverImageUrl(''); // Или оставить текущий, если не выбран новый файл
         }
     };
-
-    /**
-     * @function handleSubmit
-     * @description Обработчик отправки формы редактирования книги.
-     * @param {React.FormEvent} e - Событие формы.
-     */
+    
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -119,7 +93,6 @@ const EditBookFormPage: React.FC = () => {
             title,
             author,
             description,
-            // Используем coverImageUrl, который мог быть установлен из файла или вручную
             coverImageUrl: coverImageUrl || '/book-cover-default.png',
             isForSale,
             priceValue: isForSale ? Number(priceValue) : undefined,
@@ -186,13 +159,12 @@ const EditBookFormPage: React.FC = () => {
                     />
                 </div>
 
-                {/* НОВОЕ ПОЛЕ: Загрузка файла обложки */}
                 <div className="form-group">
                     <label htmlFor="coverFile">Загрузить обложку (файл):</label>
                     <input
                         type="file"
                         id="coverFile"
-                        accept="image/*" // Принимаем только изображения
+                        accept="image/*" 
                         onChange={handleFileChange}
                         aria-label="Загрузить файл обложки"
                     />

@@ -1,24 +1,15 @@
-// src/pages/AdminDashboardPage.tsx
-
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom'; // <-- Убедитесь, что Link импортирован
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStatus } from '../hooks/useAuthStatus';
 import { registeredUsers, deleteUser, availableBooks, deleteBook } from '../data/appData';
 import BookCard from '../components/books/BookCard';
 
-/**
- * @component AdminDashboardPage
- * @description Страница административной панели.
- * Доступна только пользователям с ролью 'admin'.
- * Позволяет управлять пользователями (удалять) и просматривать/удалять книги с поиском.
- */
 const AdminDashboardPage: React.FC = () => {
     const navigate = useNavigate();
     const { activeUser } = useAuthStatus();
-
     const [users, setUsers] = useState(registeredUsers);
-    const [books, setBooks] = useState(availableBooks); // Все книги
-    const [filteredBooks, setFilteredBooks] = useState(availableBooks); // Отфильтрованные книги для отображения
+    const [books, setBooks] = useState(availableBooks); 
+    const [filteredBooks, setFilteredBooks] = useState(availableBooks); 
     const [searchTerm, setSearchTerm] = useState('');
     const [message, setMessage] = useState('');
 
@@ -29,29 +20,21 @@ const AdminDashboardPage: React.FC = () => {
             return;
         }
         setUsers([...registeredUsers]);
-        // Обновляем и фильтруем книги при изменении данных или поискового запроса
-        const currentBooks = [...availableBooks]; // Получаем актуальный список
+        const currentBooks = [...availableBooks]; 
         const filtered = currentBooks.filter(book =>
             book.title.toLowerCase().includes(searchTerm.toLowerCase())
         );
-        setBooks(currentBooks); // Обновляем полный список (если он изменился)
-        setFilteredBooks(filtered); // Обновляем отфильтрованный список
+        setBooks(currentBooks); 
+        setFilteredBooks(filtered); 
     }, [activeUser, navigate, registeredUsers, availableBooks, searchTerm]);
 
-    /**
-     * @function handleDeleteUser
-     * @description Обработчик удаления пользователя.
-     * @param {string} userId - ID пользователя для удаления.
-     */
     const handleDeleteUser = (userId: string) => {
         if (!activeUser) return;
-
         if (window.confirm('Вы уверены, что хотите удалить этого пользователя? Все его книги будут переназначены, а обмены удалены.')) {
             const result = deleteUser(userId, activeUser.id);
             setMessage(result.message);
             if (result.success) {
                 setUsers([...registeredUsers]);
-                // После удаления пользователя, книги могли быть переназначены, поэтому обновляем их
                 const currentBooks = [...availableBooks];
                 const filtered = currentBooks.filter(book =>
                     book.title.toLowerCase().includes(searchTerm.toLowerCase())
@@ -61,12 +44,6 @@ const AdminDashboardPage: React.FC = () => {
             }
         }
     };
-
-    /**
-     * @function handleDeleteBook
-     * @description Обработчик удаления книги.
-     * @param {string} bookId - ID книги для удаления.
-     */
     const handleDeleteBook = (bookId: string) => {
         if (!activeUser) return;
 
@@ -74,7 +51,6 @@ const AdminDashboardPage: React.FC = () => {
             const result = deleteBook(bookId, activeUser.id);
             setMessage(result.message);
             if (result.success) {
-                // После удаления книги, обновляем отфильтрованный список
                 const currentBooks = [...availableBooks];
                 const filtered = currentBooks.filter(book =>
                     book.title.toLowerCase().includes(searchTerm.toLowerCase())
@@ -99,7 +75,10 @@ const AdminDashboardPage: React.FC = () => {
                 <ul className="user-list">
                     {users.map(user => (
                         <li key={user.id} className="user-item">
-                            <span>{user.name} (ID: {user.id}, Роль: {user.role})</span>
+                            <span>
+                                <Link to={`/user-profile/${user.id}`}>{user.name}</Link> 
+                                (ID: {user.id}, Роль: {user.role})
+                            </span>
                             {user.id !== activeUser.id && user.role !== 'admin' && (
                                 <button
                                     onClick={() => handleDeleteUser(user.id)}
@@ -116,8 +95,6 @@ const AdminDashboardPage: React.FC = () => {
             <section className="admin-section mt-4">
                 <h3>Управление книгами</h3>
                 <p className="info-message">Администратор может редактировать любую книгу, а так же удалять их.</p>
-                
-                {/* Поле поиска для книг в админке */}
                 <div className="search-bar mb-3">
                     <input
                         type="text"
@@ -127,17 +104,15 @@ const AdminDashboardPage: React.FC = () => {
                         aria-label="Поиск книг в админ-панели"
                     />
                 </div>
-                {/* Поле поиска для книг в админке */}
-
                 <div className="book-grid">
                     {filteredBooks.length > 0 ? (
                         filteredBooks.map(book => (
                             <div key={book.id} className="admin-book-card-wrapper">
                                 <BookCard book={book} />
-                                <div className="admin-book-actions"> {/* <-- НОВЫЙ DIV ДЛЯ КНОПОК */}
+                                <div className="admin-book-actions">
                                     <Link
                                         to={`/edit-book/${book.id}`}
-                                        className="action-button primary-button edit-book-button" // <-- КНОПКА РЕДАКТИРОВАНИЯ
+                                        className="action-button primary-button edit-book-button"
                                     >
                                         Редактировать
                                     </Link>

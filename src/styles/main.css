@@ -1,1634 +1,855 @@
-   /* src/styles/main.css */
 
-   /* Импорт шрифтов Google Fonts */
-   @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto:wght@400;500;600&display=swap');
-
-   /* --- 1. Сброс стилей (Reset CSS) --- */
-   *,
-   *::before,
-   *::after {
-       box-sizing: border-box;
-       margin: 0;
-       padding: 0;
-   }
-
-   /* --- 2. Базовые стили для body и root --- */
-   :root {
-       /* Цветовая палитра */
-       --primary-color: #4CAF50; /* Зеленый */
-       --primary-dark-color: #388E3C; /* Темно-зеленый */
-       --secondary-color: #FFC107; /* Желтый */
-       --accent-color: #2196F3; /* Синий */
-       --text-color: #333; /* Темный текст */
-       --light-text-color: #f4f4f4; /* Светлый текст */
-       --background-color: #f4f4f4; /* Светлый фон */
-       --card-background: #ffffff; /* Фон карточек */
-       --border-color: #ddd; /* Цвет границ */
-       --error-color: #f44336; /* Красный для ошибок */
-       --success-color: #4CAF50; /* Зеленый для успеха */
-
-       /* Шрифты */
-       --font-family-base: 'Roboto', sans-serif;
-       --font-family-headings: 'Montserrat', sans-serif;
-
-       /* Отступы и размеры */
-       --spacing-unit: 8px;
-       --border-radius: 8px;
-       --max-width: 1200px;
-   }
-
-   body {
-       font-family: var(--font-family-base);
-       line-height: 1.6;
-       color: var(--text-color);
-       background-color: var(--background-color);
-       -webkit-font-smoothing: antialiased;
-       -moz-osx-font-smoothing: grayscale;
-       min-height: 100vh;
-       display: flex;
-       flex-direction: column;
-   }
-
-   #root {
-       flex: 1;
-       display: flex;
-       flex-direction: column;
-   }
-
-   /* --- 3. Общие стили для ссылок --- */
-   a {
-       color: var(--accent-color);
-       text-decoration: none;
-       transition: color 0.3s ease;
-   }
-
-   a:hover {
-       color: var(--primary-color);
-   }
-
-   /* --- 4. Общие стили для кнопок --- */
-   button,
-   .action-button {
-       background-color: var(--primary-color);
-       color: var(--light-text-color);
-       padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 2.5);
-       border: none;
-       border-radius: var(--border-radius);
-       cursor: pointer;
-       font-size: 1rem;
-       transition: background-color 0.3s ease, transform 0.2s ease;
-       display: inline-flex;
-       align-items: center;
-       justify-content: center;
-       gap: var(--spacing-unit);
-       text-decoration: none;
-   }
-
-   button:hover,
-   .action-button:hover {
-       background-color: var(--primary-dark-color);
-       transform: translateY(-2px);
-   }
-
-   button:active,
-   .action-button:active {
-       transform: translateY(0);
-   }
-
-   button:disabled,
-   .action-button:disabled {
-       background-color: #cccccc;
-       cursor: not-allowed;
-       transform: none;
-   }
-
-   /* Варианты кнопок */
-   .primary-button {
-       background-color: var(--primary-color);
-   }
-   .primary-button:hover {
-       background-color: var(--primary-dark-color);
-   }
-
-   .secondary-button {
-       background-color: var(--secondary-color);
-       color: var(--text-color);
-   }
-   .secondary-button:hover {
-       background-color: #e6b000;
-   }
-
-   .submit-button {
-       background-color: var(--primary-color);
-       color: var(--light-text-color);
-   }
-   .submit-button:hover {
-       background-color: var(--primary-dark-color);
-   }
-
-   .cancel-button {
-       background-color: #9E9E9E;
-       color: var(--light-text-color);
-   }
-   .cancel-button:hover {
-       background-color: #757575;
-   }
-
-   .accept-button {
-       background-color: var(--success-color);
-   }
-   .accept-button:hover {
-       background-color: #45a049;
-   }
-
-   .reject-button {
-       background-color: var(--error-color);
-   }
-   .reject-button:hover {
-       background-color: #d32f2f;
-   }
-
-   /* --- 5. Общие стили для форм --- */
-   .form-container {
-       max-width: 600px;
-       margin: 40px auto;
-       padding: 30px;
-       background-color: var(--card-background);
-       border-radius: var(--border-radius);
-       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-   }
-
-   .form-title {
-       font-family: var(--font-family-headings);
-       font-size: 2.2rem;
-       color: var(--primary-dark-color);
-       text-align: center;
-       margin-bottom: 30px;
-       font-weight: 700;
-   }
-
-   .form-group {
-       margin-bottom: 20px;
-   }
-
-   .form-group label {
-       display: block;
-       margin-bottom: 8px;
-       font-weight: 600;
-       color: var(--text-color);
-       font-size: 1.1rem;
-   }
-
-   .form-group input[type="text"],
-   .form-group input[type="password"],
-   .form-group input[type="email"],
-   .form-group input[type="number"],
-   .form-group textarea,
-   .form-group select {
-       width: 100%;
-       padding: 12px 15px;
-       border: 1px solid var(--border-color);
-       border-radius: var(--border-radius);
-       font-size: 1rem;
-       font-family: var(--font-family-base);
-       color: var(--text-color);
-       background-color: #fdfdfd;
-       transition: border-color 0.3s ease, box-shadow 0.3s ease;
-   }
-
-   .form-group input:focus,
-   .form-group textarea:focus,
-   .form-group select:focus {
-       border-color: var(--accent-color);
-       box-shadow: 0 0 0 3px rgba(var(--accent-color), 0.2);
-       outline: none;
-   }
-
-   .form-group textarea {
-       resize: vertical;
-       min-height: 100px;
-   }
-
-   .checkbox-group {
-       display: flex;
-       align-items: center;
-       margin-bottom: 10px;
-   }
-
-   .checkbox-group input[type="checkbox"] {
-       margin-right: 10px;
-       width: 20px;
-       height: 20px;
-       accent-color: var(--primary-color);
-   }
-
-   .checkbox-group label {
-       margin-bottom: 0;
-       font-weight: normal;
-       font-size: 1rem;
-   }
-
-   .nested-group {
-       margin-left: 30px;
-       margin-top: 15px;
-       padding-left: 15px;
-       border-left: 3px solid var(--border-color);
-   }
-
-   .form-actions {
-       display: flex;
-       gap: calc(var(--spacing-unit) * 2);
-       margin-top: 25px;
-       justify-content: flex-end;
-   }
-
-   .form-actions button {
-       flex-grow: 1;
-       max-width: 180px;
-   }
-
-   /* --- 6. Общие сообщения --- */
-   .error-message {
-       color: var(--error-color);
-       background-color: rgba(244, 67, 54, 0.1); /* Использовал RGB из var(--error-color) */
-       border: 1px solid var(--error-color);
-       padding: calc(var(--spacing-unit) * 1.5);
-       border-radius: var(--border-radius);
-       margin-bottom: 20px;
-       text-align: center;
-       font-weight: 500;
-   }
-
-   .success-message {
-       color: var(--success-color);
-       background-color: rgba(76, 175, 80, 0.1); /* Использовал RGB из var(--success-color) */
-       border: 1px solid var(--success-color);
-       padding: calc(var(--spacing-unit) * 1.5);
-       border-radius: var(--border-radius);
-       margin-bottom: 20px;
-       text-align: center;
-       font-weight: 500;
-   }
-
-   .info-message {
-       color: var(--text-color);
-       background-color: rgba(33, 150, 243, 0.05); /* Использовал RGB из var(--accent-color) */
-       border: 1px solid rgba(33, 150, 243, 0.2);
-       padding: calc(var(--spacing-unit) * 1.5);
-       border-radius: var(--border-radius);
-       margin-bottom: 20px;
-       text-align: center;
-       font-weight: 400;
-   }
-
-   .page-message {
-       text-align: center;
-       font-size: 1.5rem;
-       color: var(--text-color);
-       margin-top: 50px;
-   }
-
-   .no-content-message {
-       text-align: center;
-       color: #666;
-       font-style: italic;
-       margin-top: 20px;
-   }
-
-   /* --- 7. Стили для основного контейнера приложения --- */
-   .app-container {
-       display: flex;
-       flex-direction: column;
-       min-height: 100vh;
-   }
-
-   .app-main-content {
-       flex: 1;
-       padding: 20px;
-       max-width: var(--max-width);
-       margin: 0 auto;
-       width: 100%;
-   }
-
-   /* --- 8. Адаптивность (базовые настройки) --- */
-   @media (max-width: 768px) {
-       .form-container {
-           margin: 20px;
-           padding: 20px;
-       }
-
-       .form-title {
-           font-size: 1.8rem;
-       }
-
-       button,
-       .action-button {
-           padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 1.5);
-           font-size: 0.9rem;
-       }
-
-       .form-actions {
-           flex-direction: column;
-           align-items: stretch;
-       }
-
-       .form-actions button {
-           max-width: 100%;
-       }
-   }
-
-   @media (max-width: 480px) {
-       .app-main-content {
-           padding: 10px;
-       }
-   }
-
-   /* --- Стили для AppHeader --- */
-   .app-header {
-       background-color: var(--primary-color);
-       color: var(--light-text-color);
-       padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 4);
-       display: flex;
-       justify-content: space-between;
-       align-items: center;
-       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-       flex-wrap: wrap;
-   }
-
-   .app-logo { /* Изменено с .header-logo на .app-logo */
-       display: flex;
-       align-items: center;
-       gap: var(--spacing-unit);
-       text-decoration: none;
-       color: var(--light-text-color);
-       font-family: var(--font-family-headings);
-       font-size: 1.8rem;
-       font-weight: 700;
-       transition: opacity 0.3s ease;
-   }
-
-   .app-logo:hover {
-       opacity: 0.9;
-   }
-
-   .app-logo img {
-       height: 40px;
-       width: auto;
-   }
-
-   .main-nav { /* Изменено с .header-nav на .main-nav */
-       display: flex;
-       align-items: center;
-       gap: calc(var(--spacing-unit) * 3);
-       flex-wrap: wrap;
-   }
-
-   .main-nav .nav-link {
-       color: var(--light-text-color);
-       text-decoration: none;
-       font-weight: 500;
-       font-size: 1.1rem;
-       padding: calc(var(--spacing-unit) / 2) var(--spacing-unit);
-       border-radius: var(--border-radius);
-       transition: background-color 0.3s ease, color 0.3s ease;
-   }
-
-   .main-nav .nav-link:hover {
-       background-color: rgba(255, 255, 255, 0.1);
-   }
-
-   .main-nav .nav-link.active {
-       background-color: var(--primary-dark-color);
-       font-weight: 600;
-   }
-
-   .user-controls, .auth-links { /* Изменено с .header-auth-section на .user-controls, .auth-links */
-       display: flex;
-       align-items: center;
-       gap: calc(var(--spacing-unit) * 2);
-       margin-left: auto;
-       flex-wrap: wrap;
-   }
-
-   .user-info { /* Изменено с .header-user-info на .user-info */
-       font-size: 1rem;
-       font-weight: 500;
-       white-space: nowrap;
-   }
-
-   .user-controls button, .auth-links button { /* Изменено с .header-auth-section button на .user-controls button, .auth-links button */
-       background-color: var(--secondary-color);
-       color: var(--text-color);
-       padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 2);
-       font-size: 0.95rem;
-       border-radius: var(--border-radius);
-       transition: background-color 0.3s ease;
-   }
-
-   .user-controls button:hover, .auth-links button:hover {
-       background-color: #e6b000;
-   }
-
-   /* --- Стили для AppFooter --- */
-   .app-footer {
-       background-color: var(--primary-dark-color);
-       color: var(--light-text-color);
-       padding: calc(var(--spacing-unit) * 3) calc(var(--spacing-unit) * 4);
-       text-align: center;
-       font-size: 0.9rem;
-       box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-       margin-top: auto;
-   }
-
-   .footer-content p {
-       margin-bottom: var(--spacing-unit);
-   }
-
-   .footer-content p:last-child {
-       margin-bottom: 0;
-   }
-
-   /* --- Адаптивность для Header и Footer --- */
-   @media (max-width: 992px) {
-       .app-header {
-           flex-direction: column;
-           align-items: flex-start;
-           gap: calc(var(--spacing-unit) * 2);
-       }
-
-       .main-nav {
-           width: 100%;
-           justify-content: center;
-           gap: calc(var(--spacing-unit) * 2);
-       }
-
-       .user-controls, .auth-links {
-           margin-left: 0;
-           width: 100%;
-           justify-content: center;
-       }
-   }
-
-   @media (max-width: 768px) {
-       .app-header,
-       .app-footer {
-           padding: calc(var(--spacing-unit) * 2);
-       }
-
-       .app-logo {
-           font-size: 1.5rem;
-       }
-
-       .app-logo img {
-           height: 35px;
-       }
-
-       .main-nav .nav-link {
-           font-size: 1rem;
-           padding: calc(var(--spacing-unit) / 2) calc(var(--spacing-unit) / 2);
-       }
-
-       .user-controls, .auth-links {
-           flex-direction: column;
-           align-items: center;
-           gap: var(--spacing-unit);
-       }
-
-       .user-info {
-           font-size: 0.9rem;
-       }
-
-       .user-controls button, .auth-links button {
-           width: 100%;
-           max-width: 200px;
-       }
-   }
-
-   @media (max-width: 480px) {
-       .app-header,
-       .app-footer {
-           padding: calc(var(--spacing-unit) * 1.5);
-       }
-
-       .main-nav {
-           flex-direction: column;
-           align-items: stretch;
-       }
-
-       .main-nav .nav-link {
-           text-align: center;
-           padding: var(--spacing-unit);
-       }
-   }
-
-   /* --- Стили для сетки книг на HomePage --- */
-   .book-grid {
-       display: grid;
-       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-       gap: calc(var(--spacing-unit) * 3);
-       padding: calc(var(--spacing-unit) * 3) 0;
-   }
-
-   /* --- Стили для BookCard --- */
-   .book-card {
-       background-color: var(--card-background);
-       border-radius: var(--border-radius);
-       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-       overflow: hidden;
-       display: flex;
-       flex-direction: column;
-       text-decoration: none;
-       color: var(--text-color);
-       transition: transform 0.3s ease, box-shadow 0.3s ease;
-   }
-
-   .book-card:hover {
-       transform: translateY(-5px);
-       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-   }
-
-   .book-card-cover {
-       width: 100%;
-       height: 300px;
-       object-fit: cover;
-       border-bottom: 1px solid var(--border-color);
-   }
-
-   .book-card-info {
-       padding: calc(var(--spacing-unit) * 2);
-       display: flex;
-       flex-direction: column;
-       flex-grow: 1;
-   }
-
-   .book-card-title {
-       font-family: var(--font-family-headings);
-       font-size: 1.4rem;
-       font-weight: 700;
-       margin-bottom: calc(var(--spacing-unit) / 2);
-       color: var(--primary-dark-color);
-       line-height: 1.3;
-   }
-
-   .book-card-author {
-       font-size: 1rem;
-       color: #555;
-       margin-bottom: var(--spacing-unit);
-   }
-
-   .book-card-owner {
-       font-size: 0.9rem;
-       color: #777;
-       margin-top: auto;
-   }
-
-   /* --- Адаптивность для BookCard и BookGrid --- */
-   @media (max-width: 768px) {
-       .book-grid {
-           grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-           gap: calc(var(--spacing-unit) * 2);
-       }
-
-       .book-card-cover {
-           height: 250px;
-       }
-
-       .book-card-title {
-           font-size: 1.2rem;
-       }
-   }
-
-   @media (max-width: 480px) {
-       .book-grid {
-           grid-template-columns: 1fr;
-           padding: calc(var(--spacing-unit) * 2) 0;
-       }
-
-       .book-card-cover {
-           height: 200px;
-       }
-   }
-
-   /* --- Стили для BookDetailsPage --- */
-   .book-detail-page { /* Изменено с .book-detail-container на .book-detail-page */
-       max-width: 1000px;
-       margin: 40px auto;
-       padding: 30px;
-       background-color: var(--card-background);
-       border-radius: var(--border-radius);
-       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-   }
-
-   .book-main-info { /* Изменено с .book-detail-layout на .book-main-info */
-       display: flex;
-       gap: calc(var(--spacing-unit) * 4);
-       margin-bottom: calc(var(--spacing-unit) * 5);
-       flex-wrap: wrap;
-   }
-
-   .book-cover-area { /* Изменено с .book-detail-cover на .book-cover-area */
-       flex-shrink: 0;
-       width: 300px;
-       height: 450px;
-       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-       border-radius: var(--border-radius);
-       overflow: hidden;
-   }
-
-   .book-cover-area img { /* Изменено с .book-detail-cover img на .book-cover-area img */
-       width: 100%;
-       height: 100%;
-       object-fit: cover;
-       display: block;
-   }
-
-   .book-text-info { /* Изменено с .book-detail-info на .book-text-info */
-       flex-grow: 1;
-       min-width: 300px;
-   }
-
-   .book-text-info h1 {
-       font-family: var(--font-family-headings);
-       font-size: 2.8rem;
-       color: var(--primary-dark-color);
-       margin-bottom: var(--spacing-unit);
-       line-height: 1.2;
-   }
-
-   .book-text-info h2 {
-       font-family: var(--font-family-headings);
-       font-size: 1.8rem;
-       color: #555;
-       margin-bottom: calc(var(--spacing-unit) * 2);
-       font-weight: 500;
-   }
-
-   .book-text-info p {
-       font-size: 1.1rem;
-       margin-bottom: var(--spacing-unit);
-       color: #444;
-   }
-
-   .book-text-info p strong {
-       color: var(--text-color);
-   }
-
-   .book-actions {
-       margin-top: calc(var(--spacing-unit) * 3);
-       display: flex;
-       gap: calc(var(--spacing-unit) * 2);
-       flex-wrap: wrap;
-   }
-
-   .action-button.buy-button { /* Изменено с .book-actions .buy-btn на .action-button.buy-button */
-       background-color: var(--success-color);
-   }
-   .action-button.buy-button:hover {
-       background-color: #45a049;
-   }
-
-   .action-button.trade-button { /* Изменено с .book-actions .trade-btn на .action-button.trade-button */
-       background-color: var(--accent-color);
-   }
-   .action-button.trade-button:hover {
-       background-color: #1976D2;
-   }
-
-   .owner-message { /* Изменено с .book-actions em на .owner-message */
-       font-size: 1rem;
-       color: #777;
-       margin-left: var(--spacing-unit);
-       align-self: center;
-   }
-
-   /* --- Стили для секций рецензий и цитат --- */
-   .book-additional-sections { /* Изменено с .book-extra-sections на .book-additional-sections */
-       display: flex;
-       gap: calc(var(--spacing-unit) * 4);
-       flex-wrap: wrap;
-   }
-
-   .reviews-section,
-   .quotes-section {
-       flex: 1;
-       min-width: 300px;
-   }
-
-   .reviews-section h3,
-   .quotes-section h3 {
-       font-family: var(--font-family-headings);
-       font-size: 2rem;
-       color: var(--primary-dark-color);
-       margin-bottom: calc(var(--spacing-unit) * 2);
-       border-bottom: 2px solid var(--border-color);
-       padding-bottom: var(--spacing-unit);
-   }
-
-   /* --- Стили для карточек рецензий и цитат --- */
-   .content-card.review-card, .content-card.quote-card { /* Изменено с .review-card, .quote-card на .content-card.review-card, .content-card.quote-card */
-       background-color: #f9f9f9;
-       border: 1px solid #eee;
-       border-radius: var(--border-radius);
-       padding: calc(var(--spacing-unit) * 2);
-       margin-bottom: calc(var(--spacing-unit) * 2);
-       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-   }
-
-   .content-card p { /* Изменено с .review-card p, .quote-card p на .content-card p */
-       font-style: italic;
-       margin-bottom: var(--spacing-unit);
-       color: #333;
-   }
-
-   .content-card .content-author { /* Изменено с .review-card .author, .quote-card .author на .content-card .content-author */
-       text-align: right;
-       font-size: 0.9rem;
-       color: #777;
-       font-weight: 500;
-   }
-
-   /* --- Стили для форм добавления рецензий/цитат --- */
-   .add-content-form {
-       margin-top: calc(var(--spacing-unit) * 3);
-       padding: calc(var(--spacing-unit) * 2);
-       background-color: #f0f0f0;
-       border-radius: var(--border-radius);
-       border: 1px solid #e0e0e0;
-   }
-
-   .add-content-form textarea {
-       width: 100%;
-       min-height: 100px;
-       padding: calc(var(--spacing-unit) * 1.5);
-       border: 1px solid var(--border-color);
-       border-radius: var(--border-radius);
-       font-size: 1rem;
-       font-family: var(--font-family-base);
-       margin-bottom: calc(var(--spacing-unit) * 2);
-       resize: vertical;
-   }
-
-   .add-content-form textarea:focus {
-       border-color: var(--accent-color);
-       box-shadow: 0 0 0 3px rgba(var(--accent-color), 0.2);
-       outline: none;
-   }
-
-   .add-content-form .form-actions { /* Изменено с .add-content-form div на .add-content-form .form-actions */
-       display: flex;
-       gap: var(--spacing-unit);
-       justify-content: flex-end;
-   }
-
-   .add-content-form button {
-       padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 2);
-       font-size: 1rem;
-   }
-
-   /* --- Адаптивность для BookDetailsPage --- */
-   @media (max-width: 768px) {
-       .book-detail-page {
-           margin: 20px auto;
-           padding: 20px;
-       }
-
-       .book-main-info {
-           flex-direction: column;
-           align-items: center;
-           gap: calc(var(--spacing-unit) * 3);
-       }
-
-       .book-cover-area {
-           width: 250px;
-           height: 375px;
-       }
-
-       .book-text-info {
-           min-width: unset;
-           width: 100%;
-           text-align: center;
-       }
-
-       .book-text-info h1 {
-           font-size: 2.2rem;
-       }
-
-       .book-text-info h2 {
-           font-size: 1.5rem;
-       }
-
-       .book-actions {
-           justify-content: center;
-       }
-
-       .book-additional-sections {
-           flex-direction: column;
-           gap: calc(var(--spacing-unit) * 3);
-       }
-
-       .reviews-section,
-       .quotes-section {
-           min-width: unset;
-           width: 100%;
-       }
-
-       .reviews-section h3,
-       .quotes-section h3 {
-           font-size: 1.8rem;
-           text-align: center;
-       }
-   }
-
-   @media (max-width: 480px) {
-       .book-detail-page {
-           padding: 15px;
-       }
-
-       .book-cover-area {
-           width: 200px;
-           height: 300px;
-       }
-
-       .book-text-info h1 {
-           font-size: 1.8rem;
-       }
-
-       .book-text-info h2 {
-           font-size: 1.3rem;
-       }
-
-       .book-text-info p {
-           font-size: 1rem;
-       }
-
-       .book-actions .action-button { /* Изменено с .book-actions .buy-btn, .book-actions .trade-btn на .book-actions .action-button */
-           padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 2);
-           font-size: 1rem;
-       }
-
-       .add-content-form {
-           padding: calc(var(--spacing-unit) * 1.5);
-       }
-   }
-
-   /* --- Стили для UserProfilePage --- */
-   .profile-page-container {
-       max-width: 1000px;
-       margin: 40px auto;
-       padding: 30px;
-       background-color: var(--card-background);
-       border-radius: var(--border-radius);
-       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-   }
-
-   .profile-page-container .page-title {
-       font-family: var(--font-family-headings);
-       font-size: 2.5rem;
-       color: var(--primary-dark-color);
-       text-align: center;
-       margin-bottom: 40px;
-       border-bottom: 2px solid var(--border-color);
-       padding-bottom: 20px;
-   }
-
-   .section-title {
-       font-family: var(--font-family-headings);
-       font-size: 2rem;
-       color: var(--primary-color);
-       margin-top: 40px;
-       margin-bottom: 20px;
-       text-align: center;
-   }
-
-   /* --- Стили для секции баланса --- */
-   .balance-section {
-       display: flex;
-       justify-content: center;
-       align-items: center;
-       gap: calc(var(--spacing-unit) * 3);
-       font-size: 1.5rem;
-       font-weight: 600;
-       color: var(--text-color);
-       margin-bottom: 30px;
-       flex-wrap: wrap;
-   }
-
-   .balance-section .action-button {
-       font-size: 1.1rem;
-       padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 3);
-   }
-
-   .top-up-form {
-       display: flex;
-       gap: var(--spacing-unit);
-       justify-content: center;
-       align-items: center;
-       margin-top: 20px;
-       margin-bottom: 30px;
-       flex-wrap: wrap;
-   }
-
-   .top-up-form input {
-       padding: calc(var(--spacing-unit) * 1.5);
-       border: 1px solid var(--border-color);
-       border-radius: var(--border-radius);
-       font-size: 1rem;
-       width: 180px;
-   }
-
-   .top-up-form button {
-       padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 2.5);
-       font-size: 1rem;
-   }
-
-   /* --- Стили для секции предложений обмена --- */
-   .trades-section {
-       margin-top: 50px;
-   }
-
-   .trades-section h3 {
-       font-family: var(--font-family-headings);
-       font-size: 1.8rem;
-       color: var(--primary-dark-color);
-       margin-top: 30px;
-       margin-bottom: 20px;
-       border-bottom: 1px solid var(--border-color);
-       padding-bottom: 10px;
-       text-align: center;
-   }
-
-   .trade-list {
-       display: flex;
-       flex-direction: column;
-       gap: calc(var(--spacing-unit) * 3);
-   }
-
-   .trade-offer-card {
-       background-color: #f9f9f9;
-       border: 1px solid #eee;
-       border-radius: var(--border-radius);
-       padding: calc(var(--spacing-unit) * 3);
-       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-       display: flex;
-       flex-direction: column;
-       gap: calc(var(--spacing-unit) * 2);
-   }
-
-   .trade-offer-card p {
-       font-size: 1.1rem;
-       color: #333;
-       text-align: center;
-   }
-
-   .trade-books-display {
-       display: flex;
-       justify-content: center;
-       align-items: center;
-       gap: calc(var(--spacing-unit) * 3);
-       flex-wrap: wrap;
-   }
-
-   .trade-books-display .book-item {
-       display: flex;
-       flex-direction: column;
-       align-items: center;
-       text-align: center;
-       max-width: 150px;
-   }
-
-   .trade-books-display .book-item img {
-       width: 100px;
-       height: 150px;
-       object-fit: cover;
-       border-radius: var(--border-radius);
-       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-       margin-bottom: var(--spacing-unit);
-   }
-
-   .trade-books-display .book-item p {
-       font-size: 0.9rem;
-       font-weight: 500;
-       color: #555;
-       margin-bottom: 0;
-   }
-
-   .trade-arrow {
-       font-size: 2rem;
-       color: var(--primary-color);
-       font-weight: bold;
-   }
-
-   .trade-actions {
-       display: flex;
-       justify-content: center;
-       gap: calc(var(--spacing-unit) * 2);
-       margin-top: calc(var(--spacing-unit) * 2);
-       flex-wrap: wrap;
-   }
-
-   .trade-actions .action-button {
-       padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 2);
-       font-size: 1rem;
-   }
-
-   /* --- Стили для секции "Мои книги" --- */
-   .my-books-section {
-       margin-top: 50px;
-   }
-
-   .my-books-section .book-grid {
-       padding: 0;
-   }
-
-   /* --- Адаптивность для UserProfilePage --- */
-   @media (max-width: 768px) {
-       .profile-page-container {
-           margin: 20px auto;
-           padding: 20px;
-       }
-
-       .profile-page-container .page-title {
-           font-size: 2rem;
-           margin-bottom: 30px;
-       }
-
-       .section-title {
-           font-size: 1.8rem;
-           margin-top: 30px;
-       }
-
-       .balance-section {
-           font-size: 1.3rem;
-           flex-direction: column;
-           gap: calc(var(--spacing-unit) * 2);
-       }
-
-       .top-up-form {
-           flex-direction: column;
-           gap: calc(var(--spacing-unit) * 1.5);
-       }
-
-       .top-up-form input {
-           width: 100%;
-           max-width: 250px;
-       }
-
-       .trade-books-display {
-           flex-direction: column;
-           gap: calc(var(--spacing-unit) * 2);
-       }
-
-       .trade-arrow {
-           transform: rotate(90deg);
-       }
-
-       .trade-actions {
-           flex-direction: column;
-           gap: var(--spacing-unit);
-       }
-
-       .trade-actions .action-button {
-           width: 100%;
-       }
-   }
-
-   @media (max-width: 480px) {
-       .profile-page-container {
-           padding: 15px;
-       }
-
-       .profile-page-container .page-title {
-           font-size: 1.8rem;
-       }
-
-       .section-title {
-           font-size: 1.5rem;
-       }
-
-       .balance-section {
-           font-size: 1.1rem;
-       }
-
-       .trade-offer-card {
-           padding: calc(var(--spacing-unit) * 2);
-       }
-
-       .trade-books-display .book-item img {
-           width: 80px;
-           height: 120px;
-       }
-   }
-
-   /* --- Стили для ProposeTradePage --- */
-   .trade-page-container {
-       max-width: 700px;
-       margin: 40px auto;
-       padding: 30px;
-       background-color: var(--card-background);
-       border-radius: var(--border-radius);
-       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-       text-align: center;
-   }
-
-   .trade-page-container .page-title {
-       font-family: var(--font-family-headings);
-       font-size: 2.5rem;
-       color: var(--primary-dark-color);
-       margin-bottom: 30px;
-   }
-
-   .trade-page-container p {
-       font-size: 1.1rem;
-       color: #555;
-       margin-bottom: 25px;
-       line-height: 1.5;
-   }
-
-   .trade-page-container p strong {
-       color: var(--text-color);
-   }
-
-   .trade-form .form-group {
-       margin-bottom: 30px;
-   }
-
-   .trade-form select {
-       width: 100%;
-       padding: 12px 15px;
-       border: 1px solid var(--border-color);
-       border-radius: var(--border-radius);
-       font-size: 1rem;
-       font-family: var(--font-family-base);
-       color: var(--text-color);
-       background-color: #fdfdfd;
-       appearance: none;
-       background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-6.5%200-12.3%203.2-16.1%208.1-3.8%204.9-4.9%2011-3.1%2016.9l132.6%20132.3c3.8%203.8%209%205.9%2014.3%205.9%205.3%200%2010.5-2.1%2014.3-5.9L287%2086.3c3.8-4.9%204.9-11%203.1-16.9z%22%2F%3E%3C%2Fsvg%3E');
-       background-repeat: no-repeat;
-       background-position: right 15px top 50%;
-       background-size: 12px auto;
-       cursor: pointer;
-       transition: border-color 0.3s ease, box-shadow 0.3s ease;
-   }
-
-   .trade-form select:focus {
-       border-color: var(--accent-color);
-       box-shadow: 0 0 0 3px rgba(var(--accent-color), 0.2);
-       outline: none;
-   }
-
-   .trade-form .action-button {
-       margin-top: 20px;
-       width: auto;
-       min-width: 200px;
-   }
-
-   /* --- Адаптивность для ProposeTradePage --- */
-   @media (max-width: 768px) {
-       .trade-page-container {
-           margin: 20px auto;
-           padding: 25px;
-       }
-
-       .trade-page-container .page-title {
-           font-size: 2rem;
-           margin-bottom: 20px;
-       }
-
-       .trade-page-container p {
-           font-size: 1rem;
-           margin-bottom: 20px;
-       }
-
-       .trade-form select {
-           padding: 10px 12px;
-           font-size: 0.95rem;
-       }
-
-       .trade-form .action-button {
-           width: 100%;
-           min-width: unset;
-       }
-   }
-
-   @media (max-width: 480px) {
-       .trade-page-container {
-           padding: 15px;
-       }
-
-       .trade-page-container .page-title {
-           font-size: 1.8rem;
-       }
-   }
-
-   /* --- Общие утилиты CSS --- */
-
-   /* Центрирование текста */
-   .text-center {
-       text-align: center;
-   }
-
-   /* Отступы */
-   .mt-1 { margin-top: var(--spacing-unit); }
-   .mt-2 { margin-top: calc(var(--spacing-unit) * 2); }
-   .mt-3 { margin-top: calc(var(--spacing-unit) * 3); }
-   .mt-4 { margin-top: calc(var(--spacing-unit) * 4); }
-   .mt-5 { margin-top: calc(var(--spacing-unit) * 5); }
-
-   .mb-1 { margin-bottom: var(--spacing-unit); }
-   .mb-2 { margin-bottom: calc(var(--spacing-unit) * 2); }
-   .mb-3 { margin-bottom: calc(var(--spacing-unit) * 3); }
-   .mb-4 { margin-bottom: calc(var(--spacing-unit) * 4); }
-   .mb-5 { margin-bottom: calc(var(--spacing-unit) * 5); }
-
-   .py-1 { padding-top: var(--spacing-unit); padding-bottom: var(--spacing-unit); }
-   .py-2 { padding-top: calc(var(--spacing-unit) * 2); padding-bottom: calc(var(--spacing-unit) * 2); }
-   .py-3 { padding-top: calc(var(--spacing-unit) * 3); padding-bottom: calc(var(--spacing-unit) * 3); }
-
-   .px-1 { padding-left: var(--spacing-unit); padding-right: var(--spacing-unit); }
-   .px-2 { padding-left: calc(var(--spacing-unit) * 2); padding-right: calc(var(--spacing-unit) * 2); }
-   .px-3 { padding-left: calc(var(--spacing-unit) * 3); padding-right: calc(var(--spacing-unit) * 3); }
-
-   /* Flexbox утилиты */
-   .d-flex { display: flex; }
-   .justify-content-center { justify-content: center; }
-   .align-items-center { align-items: center; }
-   .flex-column { flex-direction: column; }
-   .flex-wrap { flex-wrap: wrap; }
-   .gap-1 { gap: var(--spacing-unit); }
-   .gap-2 { gap: calc(var(--spacing-unit) * 2); }
-   .gap-3 { gap: calc(var(--spacing-unit) * 3); }
-
-   /* Скрытые элементы */
-   .d-none { display: none; }
-
-   /* Видимость */
-   .invisible { visibility: hidden; }
-
-   /* Курсор */
-   .cursor-pointer { cursor: pointer; }
-
-   /* Стили для изображений */
-   .img-fluid {
-       max-width: 100%;
-       height: auto;
-       display: block;
-   }
-
-   /* Карточки (общие) */
-   .card {
-       background-color: var(--card-background);
-       border-radius: var(--border-radius);
-       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-       padding: calc(var(--spacing-unit) * 3);
-   }
-
-   /* Анимации (пример) */
-   .fade-in {
-       animation: fadeIn 0.5s ease-in-out;
-   }
-
-   @keyframes fadeIn {
-       from { opacity: 0; }
-       to { opacity: 1; }
-   }
-
-   .slide-up {
-       animation: slideUp 0.4s ease-out;
-   }
-
-   @keyframes slideUp {
-       from { transform: translateY(20px); opacity: 0; }
-       to { transform: translateY(0); opacity: 1; }
-   }
-   /* --- Стили для PaymentPage --- */
-.payment-form .half-width-group {
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto:wght@400;500;600&display=swap');
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+:root {
+    
+    --primary-color: #4CAF50; 
+    --primary-dark-color: #388E3C; 
+    --secondary-color: #FFC107; 
+    --accent-color: #2196F3; 
+    --text-color: #333; 
+    --light-text-color: #f4f4f4; 
+    --background-color: #f4f4f4; 
+    --card-background: #ffffff; 
+    --border-color: #ddd; 
+    --error-color: #f44336; 
+    --success-color: #4CAF50; 
+
+
+    --font-family-base: 'Roboto', sans-serif;
+    --font-family-headings: 'Montserrat', sans-serif;
+
+   
+    --spacing-unit: 8px;
+    --border-radius: 8px;
+    --max-width: 1200px;
+}
+
+body {
+    font-family: var(--font-family-base);
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--background-color);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
     display: flex;
-    gap: calc(var(--spacing-unit) * 2);
+    flex-direction: column;
+}
+
+#root {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- 3. Общие стили для ссылок --- */
+a {
+    color: var(--accent-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--primary-color);
+}
+
+/* --- 4. Общие стили для кнопок --- */
+button,
+.action-button {
+    background-color: var(--primary-color);
+    color: var(--light-text-color);
+    padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 2.5);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-unit);
+}
+
+button:hover,
+.action-button:hover {
+    background-color: var(--primary-dark-color);
+    transform: translateY(-2px);
+}
+
+button:active,
+.action-button:active {
+    transform: translateY(0);
+}
+
+button:disabled,
+.action-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+/* Варианты кнопок */
+.primary-button {
+    background-color: var(--primary-color);
+}
+
+.primary-button:hover {
+    background-color: var(--primary-dark-color);
+}
+
+.secondary-button {
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+}
+
+.secondary-button:hover {
+    background-color: #e6b000;
+}
+
+.submit-button {
+    background-color: var(--primary-color);
+    color: var(--light-text-color);
+}
+
+.submit-button:hover {
+    background-color: var(--primary-dark-color);
+}
+
+.cancel-button {
+    background-color: #9E9E9E;
+    color: var(--light-text-color);
+}
+
+.cancel-button:hover {
+    background-color: #757575;
+}
+
+.accept-button {
+    background-color: var(--success-color);
+}
+
+.accept-button:hover {
+    background-color: #45a049;
+}
+
+.reject-button {
+    background-color: var(--error-color);
+}
+
+.reject-button:hover {
+    background-color: #d32f2f;
+}
+
+/* --- 5. Общие стили для форм --- */
+.form-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.form-title {
+    font-family: var(--font-family-headings);
+    font-size: 2.2rem;
+    color: var(--primary-dark-color);
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: 700;
+}
+
+.form-group {
     margin-bottom: 20px;
 }
 
-.payment-form .half-width-item {
-    flex: 1;
-}
-
-@media (max-width: 480px) {
-    .payment-form .half-width-group {
-        flex-direction: column;
-    }
-}
-/* Стили для предпросмотра обложки в AddBookFormPage */
-.cover-preview {
-    margin-top: 15px;
-    padding: 10px;
-    border: 1px dashed var(--border-color);
-    border-radius: var(--border-radius);
-    text-align: center;
-    background-color: #fcfcfc;
-}
-
-.cover-preview p {
-    font-size: 0.9rem;
-    color: #555;
-    margin-bottom: 5px;
-}
-
-.cover-preview img {
-    max-width: 150px;
-    max-height: 200px;
-    margin-top: 10px;
-    border: 1px solid #ddd;
-    border-radius: var(--border-radius);
-    object-fit: contain; /* Чтобы изображение полностью помещалось */
-}
-
-/* src/styles/profile.css */
-
-/* ... (существующие стили) ... */
-
-/* Стили для обертки карточки книги и кнопки удаления */
-.my-book-card-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-unit); /* Отступ между карточкой и кнопкой */
-    align-items: center; /* Центрируем кнопку под карточкой */
-}
-
-.delete-book-button {
-    width: 100%; /* Кнопка занимает всю ширину карточки */
-    max-width: 250px; /* Ограничиваем ширину, чтобы не была слишком широкой */
-    padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 2);
-    font-size: 0.95rem;
-    margin-top: 0; /* Убираем лишний отступ, так как gap уже есть */
-}
-
-/* Адаптивность для кнопки удаления */
-@media (max-width: 768px) {
-    .delete-book-button {
-        max-width: 200px; /* Меньшая ширина на мобильных */
-    }
-}
-
-@media (max-width: 480px) {
-    .delete-book-button {
-        max-width: 100%; /* Полная ширина на очень маленьких экранах */
-    }
-}
-/* src/styles/main.css */
-
-/* ... (весь предыдущий код CSS) ... */
-
-/* --- Стили для AdminDashboardPage --- */
-.admin-section {
-    background-color: var(--card-background);
-    border-radius: var(--border-radius);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    padding: calc(var(--spacing-unit) * 3);
-    margin-bottom: calc(var(--spacing-unit) * 3);
-}
-
-.admin-section h3 {
-    font-family: var(--font-family-headings);
-    font-size: 1.8rem;
-    color: var(--primary-dark-color);
-    margin-bottom: calc(var(--spacing-unit) * 2);
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: var(--spacing-unit);
-}
-
-.user-list {
-    list-style: none;
-    padding: 0;
-}
-
-.user-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: calc(var(--spacing-unit) * 1.5);
-    border-bottom: 1px solid #eee;
-    font-size: 1.1rem;
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
     color: var(--text-color);
-}
-
-.user-item:last-child {
-    border-bottom: none;
-}
-
-.user-item span {
-    flex-grow: 1;
-    margin-right: calc(var(--spacing-unit) * 2);
-}
-
-.user-item .action-button {
-    padding: calc(var(--spacing-unit) * 0.8) calc(var(--spacing-unit) * 1.5);
-    font-size: 0.9rem;
-}
-
-/* Адаптивность для AdminDashboardPage */
-@media (max-width: 768px) {
-    .admin-section {
-        padding: calc(var(--spacing-unit) * 2);
-    }
-
-    .admin-section h3 {
-        font-size: 1.5rem;
-    }
-
-    .user-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--spacing-unit);
-    }
-
-    .user-item span {
-        margin-right: 0;
-    }
-
-    .user-item .action-button {
-        width: 100%;
-        max-width: 150px;
-    }
-}
-
-@media (max-width: 480px) {
-    .admin-section {
-        padding: calc(var(--spacing-unit) * 1.5);
-    }
-
-    .admin-section h3 {
-        font-size: 1.3rem;
-    }
-
-    .user-item {
-        font-size: 1rem;
-    }
-}
-/* src/styles/main.css */
-
-/* ... (весь предыдущий код CSS) ... */
-
-/* --- Стили для AdminDashboardPage --- */
-.admin-section {
-    background-color: var(--card-background);
-    border-radius: var(--border-radius);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    padding: calc(var(--spacing-unit) * 3);
-    margin-bottom: calc(var(--spacing-unit) * 3);
-}
-
-.admin-section h3 {
-    font-family: var(--font-family-headings);
-    font-size: 1.8rem;
-    color: var(--primary-dark-color);
-    margin-bottom: calc(var(--spacing-unit) * 2);
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: var(--spacing-unit);
-}
-
-.user-list {
-    list-style: none;
-    padding: 0;
-}
-
-.user-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: calc(var(--spacing-unit) * 1.5);
-    border-bottom: 1px solid #eee;
     font-size: 1.1rem;
-    color: var(--text-color);
 }
 
-.user-item:last-child {
-    border-bottom: none;
-}
-
-.user-item span {
-    flex-grow: 1;
-    margin-right: calc(var(--spacing-unit) * 2);
-}
-
-.user-item .action-button {
-    padding: calc(var(--spacing-unit) * 0.8) calc(var(--spacing-unit) * 1.5);
-    font-size: 0.9rem;
-}
-
-/* Стили для обертки карточки книги и кнопки удаления в админке */
-.admin-book-card-wrapper { /* <-- НОВЫЙ СТИЛЬ */
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-unit); /* Отступ между карточкой и кнопкой */
-    align-items: center; /* Центрируем кнопку под карточкой */
-}
-
-.admin-book-card-wrapper .book-card { /* Убедимся, что BookCard внутри обертки занимает всю доступную ширину */
+.form-group input[type="text"],
+.form-group input[type="password"],
+.form-group input[type="email"],
+.form-group input[type="number"],
+.form-group textarea,
+.form-group select {
     width: 100%;
-}
-
-.delete-book-button { /* <-- НОВЫЙ СТИЛЬ */
-    width: 100%; /* Кнопка занимает всю ширину карточки */
-    max-width: 250px; /* Ограничиваем ширину, чтобы не была слишком широкой */
-    padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 2);
-    font-size: 0.95rem;
-    margin-top: 0; /* Убираем лишний отступ, так как gap уже есть */
-}
-
-
-/* Адаптивность для AdminDashboardPage */
-@media (max-width: 768px) {
-    .admin-section {
-        padding: calc(var(--spacing-unit) * 2);
-    }
-
-    .admin-section h3 {
-        font-size: 1.5rem;
-    }
-
-    .user-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--spacing-unit);
-    }
-
-    .user-item span {
-        margin-right: 0;
-    }
-
-    .user-item .action-button {
-        width: 100%;
-        max-width: 150px;
-    }
-
-    .delete-book-button { /* Адаптивность для кнопки удаления книги */
-        max-width: 200px; /* Меньшая ширина на мобильных */
-    }
-}
-
-@media (max-width: 480px) {
-    .admin-section {
-        padding: calc(var(--spacing-unit) * 1.5);
-    }
-
-    .admin-section h3 {
-        font-size: 1.3rem;
-    }
-
-    .user-item {
-        font-size: 1rem;
-    }
-
-    .delete-book-button { /* Адаптивность для кнопки удаления книги */
-        max-width: 100%; /* Полная ширина на очень маленьких экранах */
-    }
-}
-/* src/styles/main.css */
-
-/* ... (весь предыдущий код CSS) ... */
-
-/* --- Стили для поля поиска --- */
-.search-bar {
-    margin-bottom: calc(var(--spacing-unit) * 3); /* Отступ снизу */
-    text-align: center; /* Центрируем поле поиска */
-}
-
-.search-bar input {
-    width: 100%;
-    max-width: 500px; /* Ограничиваем ширину */
-    padding: 12px 20px;
+    padding: 12px 15px;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-family: var(--font-family-base);
     color: var(--text-color);
-    background-color: var(--card-background);
+    background-color: #fdfdfd;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.search-bar input:focus {
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
     border-color: var(--accent-color);
     box-shadow: 0 0 0 3px rgba(var(--accent-color), 0.2);
     outline: none;
 }
 
-/* Адаптивность для поля поиска */
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.checkbox-group input[type="checkbox"] {
+    margin-right: 10px;
+    width: 20px;
+    height: 20px;
+    accent-color: var(--primary-color);
+}
+
+.checkbox-group label {
+    margin-bottom: 0;
+    font-weight: normal;
+    font-size: 1rem;
+}
+
+.nested-group {
+    margin-left: 30px;
+    margin-top: 15px;
+    padding-left: 15px;
+    border-left: 3px solid var(--border-color);
+}
+
+.form-actions {
+    display: flex;
+    gap: calc(var(--spacing-unit) * 2);
+    margin-top: 25px;
+    justify-content: flex-end;
+}
+
+.form-actions button {
+    flex-grow: 1;
+    max-width: 180px;
+}
+
+/* --- 6. Общие сообщения --- */
+.error-message,
+.success-message,
+.info-message {
+    padding: calc(var(--spacing-unit) * 1.5);
+    border-radius: var(--border-radius);
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.error-message {
+    color: var(--error-color);
+    background-color: rgba(244, 67, 54, 0.1);
+    border: 1px solid var(--error-color);
+}
+
+.success-message {
+    color: var(--success-color);
+    background-color: rgba(76, 175, 80, 0.1);
+    border: 1px solid var(--success-color);
+}
+
+.info-message {
+    color: var(--text-color);
+    background-color: rgba(33, 150, 243, 0.05);
+    border: 1px solid rgba(33, 150, 243, 0.2);
+}
+
+.page-message {
+    text-align: center;
+    font-size: 1.5rem;
+    color: var(--text-color);
+    margin-top: 50px;
+}
+
+.no-content-message {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    margin-top: 20px;
+}
+
+/* --- 7. Стили для основного контейнера приложения --- */
+.app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.app-main-content {
+    flex: 1;
+    padding: 20px;
+    max-width: var(--max-width);
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* --- 8. Адаптивность (базовые настройки) --- */
 @media (max-width: 768px) {
-    .search-bar input {
-        font-size: 1rem;
-        padding: 10px 15px;
+    .form-container {
+        margin: 20px;
+        padding: 20px;
+    }
+
+    .form-title {
+        font-size: 1.8rem;
+    }
+
+    button,
+    .action-button {
+        padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 1.5);
+        font-size: 0.9rem;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .form-actions button {
+        max-width: 100%;
     }
 }
 
 @media (max-width: 480px) {
-    .search-bar {
-        margin-bottom: calc(var(--spacing-unit) * 2);
-    }
-    .search-bar input {
-        font-size: 0.9rem;
-        padding: 8px 12px;
+    .app-main-content {
+        padding: 10px;
     }
 }
-/* ===== Обновленный стиль для личного кабинета ===== */
+
+/* --- Стили для AppHeader --- */
+.app-header {
+    background-color: var(--primary-color);
+    color: var(--light-text-color);
+    padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 4);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    flex-wrap: wrap;
+}
+
+.app-logo {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-unit);
+    text-decoration: none;
+    color: var(--light-text-color);
+    font-family: var(--font-family-headings);
+    font-size: 1.8rem;
+    font-weight: 700;
+    transition: opacity 0.3s ease;
+}
+
+.app-logo:hover {
+    opacity: 0.9;
+}
+
+.app-logo img {
+    height: 40px;
+    width: auto;
+}
+
+.main-nav {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--spacing-unit) * 3);
+    flex-wrap: wrap;
+}
+
+.main-nav .nav-link {
+    color: var(--light-text-color);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1.1rem;
+    padding: calc(var(--spacing-unit) / 2) var(--spacing-unit);
+    border-radius: var(--border-radius);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.main-nav .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.main-nav .nav-link.active {
+    background-color: var(--primary-dark-color);
+    font-weight: 600;
+}
+
+.user-controls, .auth-links {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--spacing-unit) * 2);
+    margin-left: auto;
+    flex-wrap: wrap;
+}
+
+.user-info {
+    font-size: 1rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.user-controls button, .auth-links button {
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 2);
+    font-size: 0.95rem;
+    border-radius: var(--border-radius);
+    transition: background-color 0.3s ease;
+}
+
+.user-controls button:hover, .auth-links button:hover {
+    background-color: #e6b000;
+}
+
+/* --- Стили для AppFooter --- */
+.app-footer {
+    background-color: var(--primary-dark-color);
+    color: var(--light-text-color);
+    padding: calc(var(--spacing-unit) * 3) calc(var(--spacing-unit) * 4);
+    text-align: center;
+    font-size: 0.9rem;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+    margin-top: auto;
+}
+
+.footer-content p {
+    margin-bottom: var(--spacing-unit);
+}
+
+.footer-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* --- Адаптивность для Header и Footer --- */
+@media (max-width: 992px) {
+    .app-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: calc(var(--spacing-unit) * 2);
+    }
+
+    .main-nav {
+        width: 100%;
+        justify-content: center;
+        gap: calc(var(--spacing-unit) * 2);
+    }
+
+    .user-controls, .auth-links {
+        margin-left: 0;
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .app-header,
+    .app-footer {
+        padding: calc(var(--spacing-unit) * 2);
+    }
+
+    .app-logo {
+        font-size: 1.5rem;
+    }
+
+    .app-logo img {
+        height: 35px;
+    }
+
+    .main-nav .nav-link {
+        font-size: 1rem;
+        padding: calc(var(--spacing-unit) / 2) calc(var(--spacing-unit) / 2);
+    }
+
+    .user-controls, .auth-links {
+        flex-direction: column;
+        align-items: center;
+        gap: var(--spacing-unit);
+    }
+
+    .user-info {
+        font-size: 0.9rem;
+    }
+
+    .user-controls button, .auth-links button {
+        width: 100%;
+        max-width: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .app-header,
+    .app-footer {
+        padding: calc(var(--spacing-unit) * 1.5);
+    }
+
+    .main-nav {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .main-nav .nav-link {
+        text-align: center;
+        padding: var(--spacing-unit);
+    }
+}
+
+/* --- Стили для сетки книг на HomePage --- */
+.book-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: calc(var(--spacing-unit) * 3);
+    padding: calc(var(--spacing-unit) * 3) 0;
+}
+
+/* --- Стили для BookCard --- */
+.book-card {
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: var(--text-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.book-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.book-card-cover {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.book-card-info {
+    padding: calc(var(--spacing-unit) * 2);
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.book-card-title {
+    font-family: var(--font-family-headings);
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: calc(var(--spacing-unit) / 2);
+    color: var(--primary-dark-color);
+    line-height: 1.3;
+}
+
+.book-card-author {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: var(--spacing-unit);
+}
+
+.book-card-owner {
+    font-size: 0.9rem;
+    color: #777;
+    margin-top: auto;
+}
+
+/* --- Адаптивность для BookCard и BookGrid --- */
+@media (max-width: 768px) {
+    .book-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: calc(var(--spacing-unit) * 2);
+    }
+
+    .book-card-cover {
+        height: 250px;
+    }
+
+    .book-card-title {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .book-grid {
+        grid-template-columns: 1fr;
+        padding: calc(var(--spacing-unit) * 2) 0;
+    }
+
+    .book-card-cover {
+        height: 200px;
+    }
+}
+
+/* --- Стили для BookDetailsPage --- */
+.book-detail-page {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.book-main-info {
+    display: flex;
+    gap: calc(var(--spacing-unit) * 4);
+    margin-bottom: calc(var(--spacing-unit) * 5);
+    flex-wrap: wrap;
+}
+
+.book-cover-area {
+    flex-shrink: 0;
+    width: 300px;
+    height: 450px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.book-cover-area img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.book-text-info {
+    flex-grow: 1;
+    min-width: 300px;
+}
+
+.book-text-info h1 {
+    font-family: var(--font-family-headings);
+    font-size: 2.8rem;
+    color: var(--primary-dark-color);
+    margin-bottom: var(--spacing-unit);
+    line-height: 1.2;
+}
+
+.book-text-info h2 {
+    font-family: var(--font-family-headings);
+    font-size: 1.8rem;
+    color: #555;
+    margin-bottom: calc(var(--spacing-unit) * 2);
+    font-weight: 500;
+}
+
+.book-text-info p {
+    font-size: 1.1rem;
+    margin-bottom: var(--spacing-unit);
+    color: #444;
+}
+
+.book-text-info p strong {
+    color: var(--text-color);
+}
+
+.book-actions {
+    margin-top: calc(var(--spacing-unit) * 3);
+    display: flex;
+    gap: calc(var(--spacing-unit) * 2);
+    flex-wrap: wrap;
+}
+
+.action-button.buy-button {
+    background-color: var(--success-color);
+}
+
+.action-button.buy-button:hover {
+    background-color: #45a049;
+}
+
+.action-button.trade-button {
+    background-color: var(--accent-color);
+}
+
+.action-button.trade-button:hover {
+    background-color: #1976D2;
+}
+
+.owner-message {
+    font-size: 1rem;
+    color: #777;
+    margin-left: var(--spacing-unit);
+    align-self: center;
+}
+
+/* --- Стили для секций рецензий и цитат --- */
+.book-additional-sections {
+    display: flex;
+    gap: calc(var(--spacing-unit) * 4);
+    flex-wrap: wrap;
+}
+
+.reviews-section,
+.quotes-section {
+    flex: 1;
+    min-width: 300px;
+}
+
+.reviews-section h3,
+.quotes-section h3 {
+    font-family: var(--font-family-headings);
+    font-size: 2rem;
+    color: var(--primary-dark-color);
+    margin-bottom: calc(var(--spacing-unit) * 2);
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: var(--spacing-unit);
+}
+
+/* --- Стили для карточек рецензий и цитат --- */
+.content-card.review-card,
+.content-card.quote-card {
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: var(--border-radius);
+    padding: calc(var(--spacing-unit) * 2);
+    margin-bottom: calc(var(--spacing-unit) * 2);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.content-card p {
+    font-style: italic;
+    margin-bottom: var(--spacing-unit);
+    color: #333;
+}
+
+.content-card .content-author {
+    text-align: right;
+    font-size: 0.9rem;
+    color: #777;
+    font-weight: 500;
+}
+
+/* --- Стили для форм добавления рецензий/цитат --- */
+.add-content-form {
+    margin-top: calc(var(--spacing-unit) * 3);
+    padding: calc(var(--spacing-unit) * 2);
+    background-color: #f0f0f0;
+    border-radius: var(--border-radius);
+    border: 1px solid #e0e0e0;
+}
+
+.add-content-form textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: calc(var(--spacing-unit) * 1.5);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-family: var(--font-family-base);
+    margin-bottom: calc(var(--spacing-unit) * 2);
+    resize: vertical;
+}
+
+.add-content-form textarea:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(var(--accent-color), 0.2);
+    outline: none;
+}
+
+.add-content-form .form-actions {
+    display: flex;
+    gap: var(--spacing-unit);
+    justify-content: flex-end;
+}
+
+.add-content-form button {
+    padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 2);
+    font-size: 1rem;
+}
+
+/* --- Адаптивность для BookDetailsPage --- */
+@media (max-width: 768px) {
+    .book-detail-page {
+        margin: 20px auto;
+        padding: 20px;
+    }
+
+    .book-main-info {
+        flex-direction: column;
+        align-items: center;
+        gap: calc(var(--spacing-unit) * 3);
+    }
+
+    .book-cover-area {
+        width: 250px;
+        height: 375px;
+    }
+
+    .book-text-info {
+        min-width: unset;
+        width: 100%;
+        text-align: center;
+    }
+
+    .book-text-info h1 {
+        font-size: 2.2rem;
+    }
+
+    .book-text-info h2 {
+        font-size: 1.5rem;
+    }
+
+    .book-actions {
+        justify-content: center;
+    }
+
+    .book-additional-sections {
+        flex-direction: column;
+        gap: calc(var(--spacing-unit) * 3);
+    }
+
+    .reviews-section,
+    .quotes-section {
+        min-width: unset;
+        width: 100%;
+    }
+
+    .reviews-section h3,
+    .quotes-section h3 {
+        font-size: 1.8rem;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .book-detail-page {
+        padding: 15px;
+    }
+
+    .book-cover-area {
+        width: 200px;
+        height: 300px;
+    }
+}
+
+/* --- Стили для UserProfilePage --- */
 .profile-page-container {
     max-width: 1200px;
     margin: 2rem auto;
@@ -1915,50 +1136,35 @@
     }
 }
 
-/* src/styles/main.css */
-
-/* ... (весь предыдущий код CSS) ... */
-
-/* Стили для обертки карточки книги и кнопок в админке */
+/* --- Стили для обертки карточки книги и кнопок в админке --- */
 .admin-book-card-wrapper {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-unit); /* Отступ между карточкой и блоком кнопок */
-    align-items: center; /* Центрируем блок кнопок под карточкой */
+    gap: var(--spacing-unit); 
+    align-items: center; 
 }
 
 .admin-book-card-wrapper .book-card {
     width: 100%;
 }
 
-.admin-book-actions { /* <-- НОВЫЙ СТИЛЬ: Контейнер для кнопок редактирования и удаления */
+.admin-book-actions {
     display: flex;
-    gap: var(--spacing-unit); /* Отступ между кнопками */
-    width: 100%; /* Занимает всю ширину родителя */
-    justify-content: center; /* Центрируем кнопки внутри контейнера */
-    flex-wrap: wrap; /* Для адаптивности, чтобы кнопки переносились */
+    gap: var(--spacing-unit); 
+    width: 100%; 
+    justify-content: center; 
+    flex-wrap: wrap; 
 }
 
-.admin-book-actions .action-button { /* Общие стили для кнопок внутри этого контейнера */
-    flex: 1; /* Кнопки будут занимать равное пространство */
-    min-width: 100px; /* Минимальная ширина для каждой кнопки */
-    max-width: 120px; /* Максимальная ширина для каждой кнопки */
+.admin-book-actions .action-button {
+    flex: 1; 
+    min-width: 100px; 
+    max-width: 120px; 
     padding: calc(var(--spacing-unit) * 0.8) calc(var(--spacing-unit) * 1.2);
     font-size: 0.9rem;
-    margin-top: 0; /* Убираем лишний отступ, так как gap уже есть */
+    margin-top: 0; 
 }
 
-/* Стили для конкретных кнопок, если нужно переопределить */
-.edit-book-button {
-    /* Можно добавить специфичные стили, если primary-button недостаточно */
-}
-
-.delete-book-button {
-    /* Можно добавить специфичные стили, если reject-button недостаточно */
-}
-
-
-/* Адаптивность для AdminDashboardPage */
 @media (max-width: 768px) {
     .admin-section {
         padding: calc(var(--spacing-unit) * 2);
@@ -1984,12 +1190,12 @@
     }
 
     .admin-book-actions {
-        flex-direction: column; /* Кнопки будут располагаться друг под другом на мобильных */
-        max-width: 250px; /* Ограничиваем ширину блока кнопок */
+        flex-direction: column; 
+        max-width: 250px; 
     }
 
     .admin-book-actions .action-button {
-        max-width: 100%; /* Кнопки занимают всю ширину контейнера */
+        max-width: 100%;
     }
 }
 
@@ -2007,6 +1213,61 @@
     }
 
     .admin-book-actions {
-        max-width: 100%; /* Полная ширина на очень маленьких экранах */
+        max-width: 100%; 
     }
+}
+
+.search-bar {
+    margin-bottom: calc(var(--spacing-unit) * 3); 
+    text-align: center; 
+}
+
+.search-bar input {
+    width: 100%;
+    max-width: 500px; 
+    padding: 12px 20px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1.1rem;
+    font-family: var(--font-family-base);
+    color: var(--text-color);
+    background-color: var(--card-background);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-bar input:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(var(--accent-color), 0.2);
+    outline: none;
+}
+
+@media (max-width: 768px) {
+    .search-bar input {
+        font-size: 1rem;
+        padding: 10px 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .search-bar {
+        margin-bottom: calc(var(--spacing-unit) * 2);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.slide-up {
+    animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }

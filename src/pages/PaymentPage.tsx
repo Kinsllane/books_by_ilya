@@ -1,44 +1,29 @@
-// src/pages/PaymentPage.tsx
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStatus } from '../hooks/useAuthStatus';
 import { topUpUserBalance } from '../data/appData';
 
-/**
- * @component PaymentPage
- * @description Страница симуляции оплаты для пополнения баланса.
- * Пользователь вводит "реквизиты" и подтверждает оплату.
- */
 const PaymentPage: React.FC = () => {
     const navigate = useNavigate();
-    const location = useLocation(); // Для получения данных, переданных через navigate
+    const location = useLocation(); 
     const { activeUser, setActiveUser } = useAuthStatus();
 
     const [cardNumber, setCardNumber] = useState('');
     const [expiryDate, setExpiryDate] = useState('');
     const [cvv, setCvv] = useState('');
-    const [amount, setAmount] = useState<number | null>(null); // Сумма для пополнения
+    const [amount, setAmount] = useState<number | null>(null); 
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
-    // Получаем сумму из состояния навигации при загрузке страницы
     useEffect(() => {
         if (location.state && typeof location.state.amount === 'number') {
             setAmount(location.state.amount);
         } else {
-            // Если сумма не передана, или пользователь зашел напрямую, перенаправляем
             setErrorMessage('Сумма для пополнения не указана. Пожалуйста, попробуйте снова через профиль.');
             setTimeout(() => navigate('/my-profile'), 3000);
         }
     }, [location.state, navigate]);
 
-    /**
-     * @function handlePaymentSubmit
-     * @description Обработчик отправки формы оплаты.
-     * Симулирует успешную оплату и пополняет баланс.
-     * @param {React.FormEvent} e - Событие формы.
-     */
     const handlePaymentSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setErrorMessage('');
@@ -55,21 +40,16 @@ const PaymentPage: React.FC = () => {
             return;
         }
 
-        // --- Симуляция успешной оплаты ---
-        // В реальном приложении здесь была бы интеграция с платежным шлюзом.
-        // Для симуляции, просто проверяем, что поля не пустые.
         if (!cardNumber.trim() || !expiryDate.trim() || !cvv.trim()) {
             setErrorMessage('Пожалуйста, заполните все поля платежных реквизитов.');
             return;
         }
 
-        // Вызываем функцию пополнения баланса
         const result = topUpUserBalance(activeUser.id, amount);
 
         if (result.success && result.user) {
-            setActiveUser(result.user); // Обновляем пользователя в контексте
+            setActiveUser(result.user); 
             setSuccessMessage(`Баланс успешно пополнен на ${amount}₽! Вы будете перенаправлены в профиль.`);
-            // Перенаправляем обратно в профиль через несколько секунд
             setTimeout(() => navigate('/my-profile'), 3000);
         } else {
             setErrorMessage(result.message || 'Произошла ошибка при пополнении баланса.');

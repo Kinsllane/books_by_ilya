@@ -1,43 +1,32 @@
-// src/pages/UserLoginPage.tsx
-
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuthStatus } from '../hooks/useAuthStatus'; // Импортируем наш хук аутентификации
+import { useAuthStatus } from '../hooks/useAuthStatus'; 
 
-/**
- * @component UserLoginPage
- * @description Страница для входа пользователей в систему.
- */
 const UserLoginPage: React.FC = () => {
-    const [username, setUsername] = useState(''); // Состояние для имени пользователя
-    const [password, setPassword] = useState(''); // Состояние для пароля
-    const [errorMessage, setErrorMessage] = useState(''); // Состояние для сообщений об ошибках
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState(''); 
+    const [errorMessage, setErrorMessage] = useState(''); 
     
-    const { signIn } = useAuthStatus(); // Получаем функцию signIn из хука
-    const navigate = useNavigate(); // Хук для навигации
+    const { signIn } = useAuthStatus(); 
+    const navigate = useNavigate();
 
-    /**
-     * @function handleLoginSubmit
-     * @description Обработчик отправки формы входа.
-     * @param {React.FormEvent} e - Событие формы.
-     */
     const handleLoginSubmit = (e: React.FormEvent) => {
-        e.preventDefault(); // Предотвращаем стандартное поведение формы
-        setErrorMessage(''); // Сбрасываем предыдущие ошибки
+        e.preventDefault(); 
+        setErrorMessage(''); 
 
-        const user = signIn(username, password); // Пытаемся войти
+        const user = signIn(username, password); 
         if (user) {
-            navigate('/'); // При успешном входе перенаправляем на главную страницу
+            navigate('/'); 
         } else {
-            setErrorMessage('Неверное имя пользователя или пароль. Пожалуйста, попробуйте снова.'); // Устанавливаем сообщение об ошибке
+            setErrorMessage('Неверное имя пользователя или пароль. Пожалуйста, попробуйте снова.'); 
         }
     };
 
     return (
-        <div className="form-container"> {/* Контейнер для формы */}
-            <h2 className="form-title">Вход в аккаунт</h2> {/* Заголовок формы */}
-            <form onSubmit={handleLoginSubmit} className="auth-form"> {/* Форма входа */}
-                {errorMessage && <p className="error-message">{errorMessage}</p>} {/* Отображение ошибки, если есть */}
+        <div className="form-container"> 
+            <h2 className="form-title">Вход в аккаунт</h2> 
+            <form onSubmit={handleLoginSubmit} className="auth-form"> 
+                {errorMessage && <p className="error-message">{errorMessage}</p>} 
                 
                 <div className="form-group">
                     <label htmlFor="username">Имя пользователя:</label>

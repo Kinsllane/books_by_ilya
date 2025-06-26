@@ -1,20 +1,10 @@
-// src/pages/AddBookFormPage.tsx
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStatus } from '../hooks/useAuthStatus';
 import { addNewBook } from '../data/appData';
-
-/**
- * @component AddBookFormPage
- * @description Страница для добавления новой книги в каталог.
- * Доступна только авторизованным пользователям.
- */
 const AddBookFormPage: React.FC = () => {
     const navigate = useNavigate();
     const { activeUser } = useAuthStatus();
-
-    // Состояния для полей формы
     const [title, setTitle] = useState('');
     const [author, setAuthor] = useState('');
     const [description, setDescription] = useState('');
@@ -22,15 +12,9 @@ const AddBookFormPage: React.FC = () => {
     const [isForSale, setIsForSale] = useState(false);
     const [priceValue, setPriceValue] = useState('');
     const [isForTrade, setIsForTrade] = useState(false);
-    // НОВОЕ СОСТОЯНИЕ: Год публикации
-    const [publicationYear, setPublicationYear] = useState<string>(''); // Храним как строку для input
+    const [publicationYear, setPublicationYear] = useState<string>(''); 
 
-    /**
-     * @function handleFileChange
-     * @description Обработчик изменения файла обложки.
-     * Читает выбранный файл как Data URL.
-     * @param {React.ChangeEvent<HTMLInputElement>} e - Событие изменения файла.
-     */
+    
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
@@ -54,11 +38,6 @@ const AddBookFormPage: React.FC = () => {
         }
     };
 
-    /**
-     * @function handleSubmit
-     * @description Обработчик отправки формы добавления книги.
-     * @param {React.FormEvent} e - Событие формы.
-     */
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -73,7 +52,6 @@ const AddBookFormPage: React.FC = () => {
             return;
         }
 
-        // Дополнительная проверка для года публикации
         const year = Number(publicationYear);
         if (isNaN(year) || year <= 0 || year > new Date().getFullYear() + 5) { // Год не может быть в будущем слишком далеко
             alert('Пожалуйста, укажите корректный год публикации.');
@@ -82,7 +60,6 @@ const AddBookFormPage: React.FC = () => {
 
         const finalCoverImageUrl = coverImageDataUrl || '/book-cover-default.png';
 
-        // Создаем объект новой книги
         const newBookData = {
             title,
             author,
@@ -91,7 +68,7 @@ const AddBookFormPage: React.FC = () => {
             isForSale,
             priceValue: isForSale ? Number(priceValue) : undefined,
             isForTrade,
-            publicationYear: year // НОВОЕ ПОЛЕ: Год публикации
+            publicationYear: year 
         };
 
         addNewBook(newBookData, activeUser);
@@ -140,8 +117,6 @@ const AddBookFormPage: React.FC = () => {
                         aria-label="Описание книги"
                     />
                 </div>
-
-                {/* НОВОЕ ПОЛЕ: Год публикации */}
                 <div className="form-group">
                     <label htmlFor="publicationYear">Год публикации:</label>
                     <input
@@ -150,8 +125,8 @@ const AddBookFormPage: React.FC = () => {
                         value={publicationYear}
                         onChange={(e) => setPublicationYear(e.target.value)}
                         required
-                        min="1" // Минимальный год (можно уточнить)
-                        max={new Date().getFullYear() + 5} // Максимальный год (немного в будущее для гибкости)
+                        min="1" 
+                        max={new Date().getFullYear() + 5} 
                         aria-label="Год публикации книги"
                     />
                 </div>

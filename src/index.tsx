@@ -1,13 +1,10 @@
-   // src/index.tsx
-
    import React from 'react';
    import ReactDOM from 'react-dom/client';
    import { BrowserRouter } from 'react-router-dom';
    import App from './App';
    import { UserAuthProvider } from './context/UserAuthContext';
 
-   // Импортируем единый файл стилей
-   import './styles/main.css'; // <-- Изменено здесь
+   import './styles/main.css'; 
 
    const rootElement = document.getElementById('root');
 

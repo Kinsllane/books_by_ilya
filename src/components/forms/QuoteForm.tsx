@@ -1,35 +1,20 @@
-// src/components/forms/QuoteForm.tsx
-
 import React, { useState } from 'react';
 
-/**
- * @interface QuoteFormProps
- * @description Свойства для компонента QuoteForm.
- * @property {(text: string) => void} onSubmit - Функция, вызываемая при отправке формы с текстом цитаты.
- * @property {() => void} onCancel - Функция, вызываемая при отмене ввода.
- */
 interface QuoteFormProps {
     onSubmit: (text: string) => void;
     onCancel: () => void;
 }
 
-/**
- * @component QuoteForm
- * @description Форма для добавления новой цитаты к книге.
- */
-const QuoteForm: React.FC<QuoteFormProps> = ({ onSubmit, onCancel }) => {
-    const [quoteText, setQuoteText] = useState(''); // Состояние для текста цитаты
 
-    /**
-     * @function handleSubmit
-     * @description Обработчик отправки формы.
-     * @param {React.FormEvent} e - Событие формы.
-     */
+const QuoteForm: React.FC<QuoteFormProps> = ({ onSubmit, onCancel }) => {
+    const [quoteText, setQuoteText] = useState(''); 
+
+    
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (quoteText.trim()) { // Проверяем, что текст не пустой
-            onSubmit(quoteText.trim()); // Вызываем onSubmit с очищенным текстом
-            setQuoteText(''); // Очищаем поле ввода
+        if (quoteText.trim()) { 
+            onSubmit(quoteText.trim()); 
+            setQuoteText(''); 
         }
     };
 
@@ -40,7 +25,7 @@ const QuoteForm: React.FC<QuoteFormProps> = ({ onSubmit, onCancel }) => {
                 onChange={(e) => setQuoteText(e.target.value)}
                 placeholder="Введите цитату..."
                 required
-                rows={4} // Увеличиваем высоту текстового поля
+                rows={4} 
                 aria-label="Текст цитаты"
             />
             <div className="form-actions">
@@ -50,5 +35,4 @@ const QuoteForm: React.FC<QuoteFormProps> = ({ onSubmit, onCancel }) => {
         </form>
     );
 };
-
 export default QuoteForm;

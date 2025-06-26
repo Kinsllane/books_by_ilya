@@ -1,58 +1,47 @@
-// src/pages/BookDetailsPage.tsx
-
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom'; // Добавляем Link
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuthStatus } from '../hooks/useAuthStatus';
 import {
     retrieveBookById,
     addReviewToBook,
     addQuoteToBook,
     purchaseBook,
-    availableBooks // Импортируем для принудительного обновления
+    availableBooks
 } from '../data/appData';
 
 import ReviewForm from '../components/forms/ReviewForm';
 import QuoteForm from '../components/forms/QuoteForm';
 
-/**
- * @component BookDetailsPage
- * @description Страница, отображающая подробную информацию о книге, рецензии, цитаты,
- * а также кнопки для покупки, обмена и добавления контента.
- */
+
 const BookDetailsPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { activeUser, setActiveUser } = useAuthStatus();
 
-    // Состояние книги, инициализируется при загрузке
     const [book, setBook] = useState(() => retrieveBookById(id));
     const [showReviewForm, setShowReviewForm] = useState(false);
     const [showQuoteForm, setShowQuoteForm] = useState(false);
 
-    // Эффект для обновления книги, если данные в appData изменились (например, после покупки/редактирования)
     useEffect(() => {
         setBook(retrieveBookById(id));
-    }, [id, availableBooks]); // Зависимость от availableBooks для реакции на изменения в глобальном массиве
+    }, [id, availableBooks]);
 
-    // Обработчик добавления рецензии
     const handleAddReview = (text: string) => {
         if (activeUser && book) {
-            addReviewToBook(book.id, text, activeUser); // Обновляем книгу в appData
-            setBook(retrieveBookById(book.id)); // Перечитываем книгу из appData для обновления состояния
+            addReviewToBook(book.id, text, activeUser);
+            setBook(retrieveBookById(book.id));
             setShowReviewForm(false);
         }
     };
 
-    // Обработчик добавления цитаты
     const handleAddQuote = (text: string) => {
         if (activeUser && book) {
-            addQuoteToBook(book.id, text, activeUser); // Обновляем книгу в appData
-            setBook(retrieveBookById(book.id)); // Перечитываем книгу из appData для обновления состояния
+            addQuoteToBook(book.id, text, activeUser);
+            setBook(retrieveBookById(book.id));
             setShowQuoteForm(false);
         }
     };
 
-    // Обработчик покупки книги
     const handleBuyBook = () => {
         if (!activeUser) {
             alert('Пожалуйста, войдите в систему, чтобы совершить покупку.');
@@ -67,11 +56,8 @@ const BookDetailsPage: React.FC = () => {
         const result = purchaseBook(book.id, activeUser.id);
         if (result.success) {
             alert(result.message);
-            // Обновляем книгу в состоянии, используя данные из result.book, если они есть,
-            // иначе перечитываем из appData (на случай, если result.book undefined)
             setBook(result.book || retrieveBookById(book.id));
             if (result.buyer) {
-                // Обновляем баланс текущего пользователя в контексте
                 const { password, ...userToStore } = result.buyer;
                 setActiveUser(userToStore);
             }
@@ -80,7 +66,6 @@ const BookDetailsPage: React.FC = () => {
         }
     };
 
-    // Обработчик предложения обмена
     const handleProposeTrade = () => {
         if (!activeUser) {
             alert('Пожалуйста, войдите в систему, чтобы предложить обмен.');
@@ -92,14 +77,10 @@ const BookDetailsPage: React.FC = () => {
         }
     };
 
-    // Если книга не найдена
     if (!book) {
         return <div className="page-message">Книга не найдена.</div>;
     }
-
-    // Проверяем, является ли текущий пользователь владельцем книги
     const isOwner = activeUser?.id === book.currentOwner.id;
-    // Определяем путь к обложке. Если это Data URL или внешний URL, используем его напрямую.
     const coverPath = book.coverImageUrl.startsWith('http') || book.coverImageUrl.startsWith('data:image/')
         ? book.coverImageUrl
         : `/${book.coverImageUrl}`;
@@ -113,12 +94,13 @@ const BookDetailsPage: React.FC = () => {
                 <div className="book-text-info">
                     <h1 className="book-title">{book.title}</h1>
                     <h2 className="book-author">{book.author}</h2>
-                    <p className="book-owner"><strong>Владелец:</strong> {book.currentOwner.name}</p>
+                    <p className="book-owner">
+                        <strong>Владелец:</strong> <Link to={`/user-profile/${book.currentOwner.id}`}>{book.currentOwner.name}</Link> {/* <-- ИЗМЕНЕНИЕ ЗДЕСЬ */}
+                    </p>
                     {book.isForSale && book.priceValue && (
                         <p className="book-price"><strong>Цена:</strong> {book.priceValue}₽</p>
                     )}
                     <p className="book-description">{book.description}</p>
-                    {/* Отображаем год публикации */}
                     <p className="book-publication-year"><strong>Год публикации:</strong> {book.publicationYear}</p>
 
                     <div className="book-actions">
@@ -131,7 +113,6 @@ const BookDetailsPage: React.FC = () => {
                         {isOwner && (
                             <>
                                 <p className="owner-message"><em>Это ваша книга.</em></p>
-                                {/* Кнопка редактирования */}
                                 <Link to={`/edit-book/${book.id}`} className="action-button primary-button edit-button">
                                     Редактировать
                                 </Link>
@@ -148,7 +129,9 @@ const BookDetailsPage: React.FC = () => {
                         book.reviews.map(review => (
                             <div key={review.id} className="content-card review-card">
                                 <p className="content-text">"{review.text}"</p>
-                                <div className="content-author">- {review.reviewer.name}</div>
+                                <div className="content-author">
+                                    - <Link to={`/user-profile/${review.reviewer.id}`}>{review.reviewer.name}</Link> {/* <-- ИЗМЕНЕНИЕ ЗДЕСЬ */}
+                                </div>
                             </div>
                         ))
                     ) : (
@@ -169,7 +152,9 @@ const BookDetailsPage: React.FC = () => {
                         book.quotes.map(quote => (
                             <div key={quote.id} className="content-card quote-card">
                                 <p className="content-text">"{quote.text}"</p>
-                                <div className="content-author">- {quote.quoter.name}</div>
+                                <div className="content-author">
+                                    - <Link to={`/user-profile/${quote.quoter.id}`}>{quote.quoter.name}</Link> {/* <-- ИЗМЕНЕНИЕ ЗДЕСЬ */}
+                                </div>
                             </div>
                         ))
                     ) : (

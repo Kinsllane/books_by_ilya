@@ -1,26 +1,13 @@
-// src/components/layout/AppHeader.tsx
-
 import React from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStatus } from '../../hooks/useAuthStatus';
-
-/**
- * @component AppHeader
- * @description Компонент шапки приложения, содержащий логотип, навигацию и информацию о пользователе.
- */
 const AppHeader: React.FC = () => {
     const { activeUser, signOut } = useAuthStatus();
     const navigate = useNavigate();
-
-    /**
-     * @function handleLogout
-     * @description Обработчик выхода пользователя из системы.
-     */
     const handleLogout = () => {
         signOut();
         navigate('/');
     };
-
     return (
         <header className="app-header">
             <Link to="/" className="app-logo">
@@ -32,7 +19,7 @@ const AppHeader: React.FC = () => {
                 
                 {activeUser ? (
                     <>
-                        {activeUser.role === 'admin' && ( // <-- ПОКАЗЫВАЕМ ССЫЛКУ ТОЛЬКО АДМИНАМ
+                        {activeUser.role === 'admin' && ( 
                             <NavLink to="/admin-dashboard" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Админ-панель</NavLink>
                         )}
                         <NavLink to="/my-profile" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Мой профиль</NavLink>

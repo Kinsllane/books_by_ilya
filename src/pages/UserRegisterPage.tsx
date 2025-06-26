@@ -1,66 +1,49 @@
-// src/pages/UserRegisterPage.tsx
-
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuthStatus } from '../hooks/useAuthStatus'; // Импортируем наш хук аутентификации
-import { findUserByUsername, registerNewUser } from '../data/appData'; // Импортируем функции для работы с данными
+import { useAuthStatus } from '../hooks/useAuthStatus'; 
+import { findUserByUsername, registerNewUser } from '../data/appData'; 
 
-/**
- * @component UserRegisterPage
- * @description Страница для регистрации новых пользователей в системе.
- */
 const UserRegisterPage: React.FC = () => {
-    const [username, setUsername] = useState(''); // Состояние для имени пользователя
-    const [password, setPassword] = useState(''); // Состояние для пароля
-    const [confirmPassword, setConfirmPassword] = useState(''); // Состояние для подтверждения пароля
-    const [errorMessage, setErrorMessage] = useState(''); // Состояние для сообщений об ошибках
+    const [username, setUsername] = useState(''); 
+    const [password, setPassword] = useState(''); 
+    const [confirmPassword, setConfirmPassword] = useState(''); 
+    const [errorMessage, setErrorMessage] = useState(''); 
     
-    const { setActiveUser } = useAuthStatus(); // Получаем функцию setActiveUser из хука
-    const navigate = useNavigate(); // Хук для навигации
-
-    /**
-     * @function handleRegisterSubmit
-     * @description Обработчик отправки формы регистрации.
-     * @param {React.FormEvent} e - Событие формы.
-     */
+    const { setActiveUser } = useAuthStatus(); 
+    const navigate = useNavigate(); 
     const handleRegisterSubmit = (e: React.FormEvent) => {
-        e.preventDefault(); // Предотвращаем стандартное поведение формы
-        setErrorMessage(''); // Сбрасываем предыдущие ошибки
+        e.preventDefault(); 
+        setErrorMessage(''); 
 
-        // Проверка на совпадение паролей
         if (password !== confirmPassword) {
             setErrorMessage('Пароли не совпадают. Пожалуйста, проверьте.');
             return;
         }
 
-        // Проверка длины пароля
         if (password.length < 6) {
             setErrorMessage('Пароль должен быть не менее 6 символов.');
             return;
         }
 
-        // Проверка на уникальность имени пользователя
         if (findUserByUsername(username)) {
             setErrorMessage('Пользователь с таким именем уже существует. Пожалуйста, выберите другое имя.');
             return;
         }
 
-        // Если все проверки пройдены, регистрируем нового пользователя
         const newUser = registerNewUser(username, password);
         
-        // Автоматически входим в систему после регистрации
-        const { password: _, ...userToStore } = newUser; // Удаляем пароль перед сохранением в контекст
+        const { password: _, ...userToStore } = newUser; 
         setActiveUser(userToStore);
 
-        alert('Регистрация прошла успешно! Вы вошли в систему.'); // Уведомление об успехе
-        navigate('/'); // Перенаправляем на главную страницу
+        alert('Регистрация прошла успешно! Вы вошли в систему.'); 
+        navigate('/'); 
     };
 
     return (
-        <div className="form-container"> {/* Контейнер для формы */}
-            <h2 className="form-title">Регистрация нового аккаунта</h2> {/* Заголовок формы */}
-            <form onSubmit={handleRegisterSubmit} className="auth-form"> {/* Форма регистрации */}
-                {errorMessage && <p className="error-message">{errorMessage}</p>} {/* Отображение ошибки, если есть */}
+        <div className="form-container"> 
+            <h2 className="form-title">Регистрация нового аккаунта</h2> 
+            <form onSubmit={handleRegisterSubmit} className="auth-form"> 
+                {errorMessage && <p className="error-message">{errorMessage}</p>} 
                 
                 <div className="form-group">
                     <label htmlFor="reg-username">Имя пользователя:</label>
