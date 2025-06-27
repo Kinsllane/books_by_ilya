@@ -10,7 +10,7 @@ interface BookCardProps {
 
 const BookCard: React.FC<BookCardProps> = ({ book }) => {
     const coverPath = book.coverImageUrl.startsWith('http') || book.coverImageUrl.startsWith('data:image/')
-        ? book.coverImageUrl
+        ? book.coverImageUrl    
         : `/${book.coverImageUrl}`;
     return (
         <Link to={`/book/${book.id}`} className="book-card">

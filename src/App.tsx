@@ -26,7 +26,7 @@ const App: React.FC = () => {
                     <Route path="/book/:id" element={<BookDetailsPage />} />
                     <Route path="/login" element={<UserLoginPage />} />
                     <Route path="/register" element={<UserRegisterPage />} />
-                    <Route path="/user-profile/:id" element={<UserProfilePage />} /> {/* <-- НОВЫЙ МАРШРУТ */}
+                    <Route path="/user-profile/:id" element={<UserProfilePage />} /> 
 
                     <Route
                         path="/add-book"
