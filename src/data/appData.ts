@@ -1,6 +1,8 @@
 import { v4 as generateUniqueId } from 'uuid';
-import type { BookEntry, UserProfile, BookReview, BookQuote, BookTrade } from '../types/appTypes';
-const LS_PREFIX = 'bookswap_'; 
+import type { BookEntry, UserProfile, BookReview, BookQuote, BookTrade, BookGenre } from '../types/appTypes'; // Импортируем BookGenre
+import { ALL_BOOK_GENRES } from '../types/appTypes'; // Импортируем ALL_BOOK_GENRES
+
+const LS_PREFIX = 'bookswap_';
 const loadData = <T>(key: string, defaultData: T): T => {
     try {
         const storedData = localStorage.getItem(LS_PREFIX + key);
@@ -9,14 +11,22 @@ const loadData = <T>(key: string, defaultData: T): T => {
             return parsedData.map(user => ({
                 ...user,
                 role: user.role || 'user',
-                avatarUrl: user.avatarUrl || '/default-avatar.png', 
-                bio: user.bio || '' 
+                avatarUrl: user.avatarUrl || '/default-avatar.png',
+                bio: user.bio || ''
+            })) as T;
+        }
+        // Добавляем обработку для книг, чтобы убедиться, что у них есть жанр
+        if (key === 'availableBooks' && storedData) {
+            const parsedData: BookEntry[] = JSON.parse(storedData);
+            return parsedData.map(book => ({
+                ...book,
+                genre: book.genre || ALL_BOOK_GENRES[0] // Устанавливаем жанр по умолчанию, если его нет
             })) as T;
         }
         return storedData ? JSON.parse(storedData) : defaultData;
     } catch (error) {
         console.error(`Ошибка загрузки данных из localStorage для ключа ${key}:`, error);
-        return defaultData; 
+        return defaultData;
     }
 };
 const saveData = <T>(key: string, data: T) => {
@@ -34,11 +44,11 @@ const DEFAULT_USERS: UserProfile[] = [
         balance: 9999,
         registrationDate: '2023-01-01',
         role: 'admin',
-        avatarUrl: '/default-avatar.png', 
-        bio: 'Главный администратор системы BookSwap.' 
+        avatarUrl: '/default-avatar.png',
+        bio: 'Главный администратор системы BookSwap.'
     },
 ];
-const DEFAULT_BOOKS: BookEntry[] = []; 
+const DEFAULT_BOOKS: BookEntry[] = [];
 
 export let registeredUsers: UserProfile[] = loadData('registeredUsers', DEFAULT_USERS);
 export let availableBooks: BookEntry[] = loadData('availableBooks', DEFAULT_BOOKS);
@@ -51,7 +61,11 @@ availableBooks.forEach(book => {
         book.currentOwner = owner;
     } else {
         console.warn(`Владелец книги "${book.title}" (ID: ${book.id}) не найден. Назначаем первого пользователя (админа).`);
-        book.currentOwner = registeredUsers[0]; 
+        book.currentOwner = registeredUsers[0];
+    }
+    // Убедимся, что у книги есть жанр при инициализации
+    if (!book.genre) {
+        book.genre = ALL_BOOK_GENRES[0]; // Устанавливаем жанр по умолчанию
     }
     book.reviews.forEach(review => {
         const reviewer = registeredUsers.find(u => u.id === review.reviewer.id);
@@ -68,7 +82,7 @@ availableBooks.forEach(book => {
             quote.quoter = quoter;
         } else {
             console.warn(`Автор цитаты ${quote.id} для книги "${book.title}" не найден.`);
-            quote.quoter = registeredUsers[0]; 
+            quote.quoter = registeredUsers[0];
         }
     });
 });
@@ -79,7 +93,7 @@ activeTrades.forEach(trade => {
         trade.initiator = initiator;
     } else {
         console.warn(`Инициатор обмена ${trade.id} не найден. Обмен будет отклонен.`);
-        trade.status = 'rejected'; 
+        trade.status = 'rejected';
     }
 
     const recipient = registeredUsers.find(u => u.id === trade.recipient.id);
@@ -87,21 +101,21 @@ activeTrades.forEach(trade => {
         trade.recipient = recipient;
     } else {
         console.warn(`Получатель обмена ${trade.id} не найден. Обмен будет отклонен.`);
-        trade.status = 'rejected'; 
+        trade.status = 'rejected';
     }
     const initiatorBook = availableBooks.find(b => b.id === trade.initiatorBook.id);
     if (initiatorBook) {
         trade.initiatorBook = initiatorBook;
     } else {
         console.warn(`Книга инициатора обмена ${trade.id} не найдена. Обмен будет отклонен.`);
-        trade.status = 'rejected'; 
+        trade.status = 'rejected';
     }
     const recipientBook = availableBooks.find(b => b.id === trade.recipientBook.id);
     if (recipientBook) {
         trade.recipientBook = recipientBook;
     } else {
         console.warn(`Книга получателя обмена ${trade.id} не найдена. Обмен будет отклонен.`);
-        trade.status = 'rejected'; 
+        trade.status = 'rejected';
     }
 });
 export const authenticateUser = (username: string, password_raw: string): UserProfile | undefined => {
@@ -119,14 +133,14 @@ export const registerNewUser = (username: string, password_raw: string): UserPro
         id: `usr-${generateUniqueId()}`,
         name: username,
         password: password_raw,
-        balance: 500, 
-        registrationDate: new Date().toISOString().split('T')[0], 
-        role: 'user', 
-        avatarUrl: '/default-avatar.png', 
-        bio: '' 
+        balance: 500,
+        registrationDate: new Date().toISOString().split('T')[0],
+        role: 'user',
+        avatarUrl: '/default-avatar.png',
+        bio: ''
     };
     registeredUsers.push(newUser);
-    saveData('registeredUsers', registeredUsers); 
+    saveData('registeredUsers', registeredUsers);
     return newUser;
 };
 export const topUpUserBalance = (userId: string, amount: number): { success: boolean, message: string, user?: UserProfile } => {
@@ -148,8 +162,8 @@ export const updateUserProfile = (userId: string, updates: Partial<UserProfile>)
     }
 
     const user = registeredUsers[userIndex];
-    registeredUsers[userIndex] = { ...user, ...updates }; 
-    saveData('registeredUsers', registeredUsers); 
+    registeredUsers[userIndex] = { ...user, ...updates };
+    saveData('registeredUsers', registeredUsers);
     return { success: true, message: "Профиль успешно обновлен.", user: registeredUsers[userIndex] };
 };
 
@@ -169,8 +183,8 @@ export const deleteUser = (userIdToDelete: string, adminId: string): { success: 
     }
 
     const userToDelete = registeredUsers[userIndex];
-    const defaultOwner = registeredUsers.find(u => u.role === 'admin'); 
-    if (!defaultOwner) { 
+    const defaultOwner = registeredUsers.find(u => u.role === 'admin');
+    if (!defaultOwner) {
         return { success: false, message: "Ошибка: Администратор для переназначения книг не найден." };
     }
     availableBooks.forEach(book => {
@@ -180,7 +194,7 @@ export const deleteUser = (userIdToDelete: string, adminId: string): { success: 
     });
     registeredUsers.splice(userIndex, 1);
     saveData('registeredUsers', registeredUsers);
-    saveData('availableBooks', availableBooks); 
+    saveData('availableBooks', availableBooks);
     const initialActiveTradesLength = activeTrades.length;
     activeTrades = activeTrades.filter(trade =>
         trade.initiator.id !== userIdToDelete && trade.recipient.id !== userIdToDelete
@@ -200,12 +214,13 @@ export const addNewBook = (bookDetails: Omit<BookEntry, 'id' | 'currentOwner' | 
     const newBook: BookEntry = {
         ...bookDetails,
         id: `book-${generateUniqueId()}`,
-        currentOwner: owner, 
+        currentOwner: owner,
         reviews: [],
         quotes: [],
+        genre: bookDetails.genre || ALL_BOOK_GENRES[0], // Убедимся, что жанр установлен
     };
     availableBooks = [newBook, ...availableBooks];
-    saveData('availableBooks', availableBooks); 
+    saveData('availableBooks', availableBooks);
     return newBook;
 };
 
@@ -228,13 +243,14 @@ export const updateBook = (
     }
 
     const updatedBook: BookEntry = {
-        ...existingBook, 
-        ...updatedDetails, 
-        priceValue: updatedDetails.isForSale ? updatedDetails.priceValue : undefined
+        ...existingBook,
+        ...updatedDetails,
+        priceValue: updatedDetails.isForSale ? updatedDetails.priceValue : undefined,
+        genre: updatedDetails.genre, // Обновляем жанр
     };
 
     availableBooks[bookIndex] = updatedBook;
-    saveData('availableBooks', availableBooks); 
+    saveData('availableBooks', availableBooks);
 
     return { success: true, message: "Информация о книге успешно обновлена.", updatedBook };
 };
@@ -246,19 +262,19 @@ export const deleteBook = (bookId: string, userId: string): { success: boolean, 
     }
 
     const bookToDelete = availableBooks[bookIndex];
-    const actingUser = findUserById(userId); 
+    const actingUser = findUserById(userId);
     if (!actingUser || (bookToDelete.currentOwner.id !== userId && actingUser.role !== 'admin')) {
         return { success: false, message: "У вас нет прав для удаления этой книги." };
     }
 
     availableBooks.splice(bookIndex, 1);
-    saveData('availableBooks', availableBooks); 
+    saveData('availableBooks', availableBooks);
     const initialActiveTradesLength = activeTrades.length;
     activeTrades = activeTrades.filter(trade =>
         trade.initiatorBook.id !== bookId && trade.recipientBook.id !== bookId
     );
     if (activeTrades.length !== initialActiveTradesLength) {
-        saveData('activeTrades', activeTrades); 
+        saveData('activeTrades', activeTrades);
     }
     return { success: true, message: "Книга успешно удалена." };
 };
@@ -307,12 +323,12 @@ export const purchaseBook = (bookId: string, buyerId: string): { success: boolea
 
     buyer.balance -= book.priceValue;
     seller.balance += book.priceValue;
-    book.currentOwner = buyer; 
-    book.isForSale = false; 
-    book.isForTrade = false; 
+    book.currentOwner = buyer;
+    book.isForSale = false;
+    book.isForTrade = false;
 
-    saveData('registeredUsers', registeredUsers); 
-    saveData('availableBooks', availableBooks); 
+    saveData('registeredUsers', registeredUsers);
+    saveData('availableBooks', availableBooks);
 
     return { success: true, message: "Покупка книги успешно совершена!", book, buyer };
 };
@@ -372,13 +388,13 @@ export const respondToTradeProposal = (tradeId: string, response: 'accepted' | '
         recipientBook.isForSale = false;
         recipientBook.isForTrade = false;
         trade.status = 'accepted';
-        saveData('availableBooks', availableBooks); 
-        saveData('activeTrades', activeTrades); 
+        saveData('availableBooks', availableBooks);
+        saveData('activeTrades', activeTrades);
 
         return { success: true, message: "Обмен успешно завершен!" };
     } else {
         trade.status = response;
-        saveData('activeTrades', activeTrades); 
+        saveData('activeTrades', activeTrades);
         const message = response === 'rejected' ? "Предложение обмена отклонено." : "Предложение обмена отменено.";
         return { success: true, message };
     }

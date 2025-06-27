@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStatus } from '../hooks/useAuthStatus';
 import { addNewBook } from '../data/appData';
+import { ALL_BOOK_GENRES, BookGenre } from '../types/appTypes'; // Импортируем жанры
+
 const AddBookFormPage: React.FC = () => {
     const navigate = useNavigate();
-    const { activeUser } = useAuthStatus();
+    const { activeUser  } = useAuthStatus();
     const [title, setTitle] = useState('');
     const [author, setAuthor] = useState('');
     const [description, setDescription] = useState('');
@@ -13,8 +15,8 @@ const AddBookFormPage: React.FC = () => {
     const [priceValue, setPriceValue] = useState('');
     const [isForTrade, setIsForTrade] = useState(false);
     const [publicationYear, setPublicationYear] = useState<string>(''); 
+    const [genre, setGenre] = useState<BookGenre>(ALL_BOOK_GENRES[0]); // Добавляем состояние для жанра
 
-    
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
@@ -41,7 +43,7 @@ const AddBookFormPage: React.FC = () => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!activeUser) {
+        if (!activeUser ) {
             alert('Необходимо войти в систему, чтобы добавить книгу.');
             navigate('/login');
             return;
@@ -53,7 +55,7 @@ const AddBookFormPage: React.FC = () => {
         }
 
         const year = Number(publicationYear);
-        if (isNaN(year) || year <= 0 || year > new Date().getFullYear() + 5) { // Год не может быть в будущем слишком далеко
+        if (isNaN(year) || year <= 0 || year > new Date().getFullYear() + 5) {
             alert('Пожалуйста, укажите корректный год публикации.');
             return;
         }
@@ -68,10 +70,11 @@ const AddBookFormPage: React.FC = () => {
             isForSale,
             priceValue: isForSale ? Number(priceValue) : undefined,
             isForTrade,
-            publicationYear: year 
+            publicationYear: year,
+            genre // Добавляем жанр
         };
 
-        addNewBook(newBookData, activeUser);
+        addNewBook(newBookData, activeUser );
 
         alert('Книга успешно добавлена в каталог!');
         navigate('/');
@@ -117,6 +120,7 @@ const AddBookFormPage: React.FC = () => {
                         aria-label="Описание книги"
                     />
                 </div>
+
                 <div className="form-group">
                     <label htmlFor="publicationYear">Год публикации:</label>
                     <input
@@ -129,6 +133,24 @@ const AddBookFormPage: React.FC = () => {
                         max={new Date().getFullYear() + 5} 
                         aria-label="Год публикации книги"
                     />
+                </div>
+
+                {/* Добавляем выпадающий список для выбора жанра */}
+                <div className="form-group">
+                    <label htmlFor="genre">Жанр:</label>
+                    <select
+                        id="genre"
+                        value={genre}
+                        onChange={(e) => setGenre(e.target.value as BookGenre)}
+                        required
+                        aria-label="Жанр книги"
+                    >
+                        {ALL_BOOK_GENRES.map((g) => (
+                            <option key={g} value={g}>
+                                {g}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
                 <div className="form-group">

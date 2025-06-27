@@ -3,14 +3,16 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStatus } from '../hooks/useAuthStatus';
 import { registeredUsers, deleteUser, availableBooks, deleteBook } from '../data/appData';
 import BookCard from '../components/books/BookCard';
+import { ALL_BOOK_GENRES, BookGenre } from '../types/appTypes'; // Импортируем жанры
 
 const AdminDashboardPage: React.FC = () => {
     const navigate = useNavigate();
     const { activeUser } = useAuthStatus();
     const [users, setUsers] = useState(registeredUsers);
-    const [books, setBooks] = useState(availableBooks); 
-    const [filteredBooks, setFilteredBooks] = useState(availableBooks); 
+    const [books, setBooks] = useState(availableBooks);
+    const [filteredBooks, setFilteredBooks] = useState(availableBooks);
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedGenre, setSelectedGenre] = useState<BookGenre | ''>(''); // <-- НОВОЕ СОСТОЯНИЕ
     const [message, setMessage] = useState('');
 
     useEffect(() => {
@@ -20,25 +22,33 @@ const AdminDashboardPage: React.FC = () => {
             return;
         }
         setUsers([...registeredUsers]);
-        const currentBooks = [...availableBooks]; 
-        const filtered = currentBooks.filter(book =>
-            book.title.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        setBooks(currentBooks); 
-        setFilteredBooks(filtered); 
-    }, [activeUser, navigate, registeredUsers, availableBooks, searchTerm]);
+        const currentBooks = [...availableBooks];
+        const filtered = currentBooks.filter((book) => {
+            const matchesSearchTerm = book.title.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesGenre = selectedGenre === '' || book.genre === selectedGenre;
+            return matchesSearchTerm && matchesGenre;
+        });
+        setBooks(currentBooks);
+        setFilteredBooks(filtered);
+    }, [activeUser, navigate, registeredUsers, availableBooks, searchTerm, selectedGenre]); // Добавляем selectedGenre в зависимости
 
     const handleDeleteUser = (userId: string) => {
         if (!activeUser) return;
-        if (window.confirm('Вы уверены, что хотите удалить этого пользователя? Все его книги будут переназначены, а обмены удалены.')) {
+        if (
+            window.confirm(
+                'Вы уверены, что хотите удалить этого пользователя? Все его книги будут переназначены, а обмены удалены.'
+            )
+        ) {
             const result = deleteUser(userId, activeUser.id);
             setMessage(result.message);
             if (result.success) {
                 setUsers([...registeredUsers]);
                 const currentBooks = [...availableBooks];
-                const filtered = currentBooks.filter(book =>
-                    book.title.toLowerCase().includes(searchTerm.toLowerCase())
-                );
+                const filtered = currentBooks.filter((book) => {
+                    const matchesSearchTerm = book.title.toLowerCase().includes(searchTerm.toLowerCase());
+                    const matchesGenre = selectedGenre === '' || book.genre === selectedGenre;
+                    return matchesSearchTerm && matchesGenre;
+                });
                 setBooks(currentBooks);
                 setFilteredBooks(filtered);
             }
@@ -52,9 +62,11 @@ const AdminDashboardPage: React.FC = () => {
             setMessage(result.message);
             if (result.success) {
                 const currentBooks = [...availableBooks];
-                const filtered = currentBooks.filter(book =>
-                    book.title.toLowerCase().includes(searchTerm.toLowerCase())
-                );
+                const filtered = currentBooks.filter((book) => {
+                    const matchesSearchTerm = book.title.toLowerCase().includes(searchTerm.toLowerCase());
+                    const matchesGenre = selectedGenre === '' || book.genre === selectedGenre;
+                    return matchesSearchTerm && matchesGenre;
+                });
                 setBooks(currentBooks);
                 setFilteredBooks(filtered);
             }
@@ -68,16 +80,20 @@ const AdminDashboardPage: React.FC = () => {
     return (
         <div className="form-container">
             <h2 className="form-title">Панель администратора</h2>
-            {message && <p className={message.includes('успешно') ? 'success-message' : 'error-message'}>{message}</p>}
+            {message && (
+                <p className={message.includes('успешно') ? 'success-message' : 'error-message'}>
+                    {message}
+                </p>
+            )}
 
             <section className="admin-section">
                 <h3>Управление пользователями</h3>
                 <ul className="user-list">
-                    {users.map(user => (
+                    {users.map((user) => (
                         <li key={user.id} className="user-item">
                             <span>
-                                <Link to={`/user-profile/${user.id}`}>{user.name}</Link> 
-                                (ID: {user.id}, Роль: {user.role})
+                                <Link to={`/user-profile/${user.id}`}>{user.name}</Link> (ID: {user.id}, Роль:{' '}
+                                {user.role})
                             </span>
                             {user.id !== activeUser.id && user.role !== 'admin' && (
                                 <button
@@ -103,10 +119,24 @@ const AdminDashboardPage: React.FC = () => {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         aria-label="Поиск книг в админ-панели"
                     />
+                    {/* НОВОЕ ПОЛЕ: Выбор жанра */}
+                    <select
+                        value={selectedGenre}
+                        onChange={(e) => setSelectedGenre(e.target.value as BookGenre | '')}
+                        aria-label="Фильтр по жанру"
+                        style={{ marginLeft: '10px', padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }}
+                    >
+                        <option value="">Все жанры</option>
+                        {ALL_BOOK_GENRES.map((genre) => (
+                            <option key={genre} value={genre}>
+                                {genre}
+                            </option>
+                        ))}
+                    </select>
                 </div>
                 <div className="book-grid">
                     {filteredBooks.length > 0 ? (
-                        filteredBooks.map(book => (
+                        filteredBooks.map((book) => (
                             <div key={book.id} className="admin-book-card-wrapper">
                                 <BookCard book={book} />
                                 <div className="admin-book-actions">

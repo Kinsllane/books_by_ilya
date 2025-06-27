@@ -1427,136 +1427,37 @@ button:disabled,
 }
 
 /* --- Стили для обертки карточки книги и кнопок в админке --- */
-.admin-book-card-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-unit); 
-    align-items: center; 
-}
-
-.admin-book-card-wrapper .book-card {
-    width: 100%;
-}
-
-.admin-book-actions {
-    display: flex;
-    gap: var(--spacing-unit); 
-    width: 100%; 
-    justify-content: center; 
-    flex-wrap: wrap; 
-}
-
-.admin-book-actions .action-button {
-    flex: 1; 
-    min-width: 100px; 
-    max-width: 120px; 
-    padding: calc(var(--spacing-unit) * 0.8) calc(var(--spacing-unit) * 1.2);
-    font-size: 0.9rem;
-    margin-top: 0; 
-}
-
 @media (max-width: 768px) {
-    .admin-section {
-        padding: calc(var(--spacing-unit) * 2);
+    .search-bar {
+        flex-direction: column; /* На маленьких экранах располагаем элементы в столбец */
+        gap: 10px; /* Отступ между элементами */
     }
-
-    .admin-section h3 {
-        font-size: 1.5rem;
+    .search-bar input,
+    .search-bar select {
+        width: 100%; /* Полная ширина для инпута и селекта */
+        max-width: 100%; /* Убираем ограничение максимальной ширины */
+        margin-right: 0; /* Убираем отступ справа */
     }
-
-    .user-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--spacing-unit);
-    }
-
-    .user-item span {
-        margin-right: 0;
-    }
-
-    .user-item .action-button {
-        width: 100%;
-        max-width: 150px;
-    }
-
-    .admin-book-actions {
-        flex-direction: column; 
-        max-width: 250px; 
-    }
-
-    .admin-book-actions .action-button {
-        max-width: 100%;
-    }
-}
-
-@media (max-width: 480px) {
-    .admin-section {
-        padding: calc(var(--spacing-unit) * 1.5);
-    }
-
-    .admin-section h3 {
-        font-size: 1.3rem;
-    }
-
-    .user-item {
-        font-size: 1rem;
-    }
-
-    .admin-book-actions {
-        max-width: 100%; 
-    }
-}
-
-.search-bar {
-    margin-bottom: calc(var(--spacing-unit) * 3); 
-    text-align: center; 
-}
-
-.search-bar input {
-    width: 100%;
-    max-width: 500px; 
-    padding: 12px 20px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    font-size: 1.1rem;
-    font-family: var(--font-family-base);
-    color: var(--text-color);
-    background-color: var(--card-background);
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.search-bar input:focus {
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(var(--accent-color), 0.2);
-    outline: none;
-}
-
-@media (max-width: 768px) {
     .search-bar input {
         font-size: 1rem;
         padding: 10px 15px;
     }
 }
-
 @media (max-width: 480px) {
     .search-bar {
         margin-bottom: calc(var(--spacing-unit) * 2);
     }
 }
-
 .fade-in {
     animation: fadeIn 0.5s ease-in-out;
 }
-
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
 }
-
 .slide-up {
     animation: slideUp 0.4s ease-out;
 }
-
 @keyframes slideUp {
     from { transform: translateY(20px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }

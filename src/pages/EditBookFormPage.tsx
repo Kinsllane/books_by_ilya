@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuthStatus } from '../hooks/useAuthStatus';
 import { retrieveBookById, updateBook } from '../data/appData';
 import type { BookEntry } from '../types/appTypes';
+import { ALL_BOOK_GENRES, BookGenre } from '../types/appTypes'; // Импортируем жанры
 
 const EditBookFormPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -17,6 +18,7 @@ const EditBookFormPage: React.FC = () => {
     const [priceValue, setPriceValue] = useState('');
     const [isForTrade, setIsForTrade] = useState(false);
     const [publicationYear, setPublicationYear] = useState('');
+    const [genre, setGenre] = useState<BookGenre>(ALL_BOOK_GENRES[0]); // <-- НОВОЕ СОСТОЯНИЕ
     const [loading, setLoading] = useState(true);
     const [bookNotFound, setBookNotFound] = useState(false);
 
@@ -32,7 +34,7 @@ const EditBookFormPage: React.FC = () => {
         if (id) {
             const bookToEdit = retrieveBookById(id);
             if (bookToEdit) {
-                if (bookToEdit.currentOwner.id !== activeUser.id && activeUser.role !== 'admin') { // <-- ИЗМЕНЕНИЕ ЗДЕСЬ
+                if (bookToEdit.currentOwner.id !== activeUser.id && activeUser.role !== 'admin') {
                     alert('У вас нет прав для редактирования этой книги.');
                     navigate('/');
                     return;
@@ -41,11 +43,12 @@ const EditBookFormPage: React.FC = () => {
                 setTitle(bookToEdit.title);
                 setAuthor(bookToEdit.author);
                 setDescription(bookToEdit.description);
-                setCoverImageUrl(bookToEdit.coverImageUrl); 
+                setCoverImageUrl(bookToEdit.coverImageUrl);
                 setIsForSale(bookToEdit.isForSale);
                 setPriceValue(bookToEdit.priceValue ? String(bookToEdit.priceValue) : '');
                 setIsForTrade(bookToEdit.isForTrade);
                 setPublicationYear(String(bookToEdit.publicationYear));
+                setGenre(bookToEdit.genre); // <-- УСТАНАВЛИВАЕМ ЖАНР
                 setLoading(false);
             } else {
                 setBookNotFound(true);
@@ -56,21 +59,21 @@ const EditBookFormPage: React.FC = () => {
             setLoading(false);
         }
     }, [id, activeUser, navigate]);
-    
+
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            setSelectedFile(file); 
+            setSelectedFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
                 setCoverImageUrl(reader.result as string);
             };
-            reader.readAsDataURL(file); 
+            reader.readAsDataURL(file);
         } else {
             setSelectedFile(null);
         }
     };
-    
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -97,7 +100,8 @@ const EditBookFormPage: React.FC = () => {
             isForSale,
             priceValue: isForSale ? Number(priceValue) : undefined,
             isForTrade,
-            publicationYear: Number(publicationYear)
+            publicationYear: Number(publicationYear),
+            genre, // <-- ДОБАВЛЯЕМ ЖАНР
         };
 
         const result = updateBook(id, updatedBookData, activeUser.id);
@@ -122,7 +126,6 @@ const EditBookFormPage: React.FC = () => {
         <div className="form-container">
             <h2 className="form-title">Редактировать книгу</h2>
             <form onSubmit={handleSubmit} className="add-book-form">
-
                 <div className="form-group">
                     <label htmlFor="title">Название:</label>
                     <input
@@ -164,14 +167,12 @@ const EditBookFormPage: React.FC = () => {
                     <input
                         type="file"
                         id="coverFile"
-                        accept="image/*" 
+                        accept="image/*"
                         onChange={handleFileChange}
                         aria-label="Загрузить файл обложки"
                     />
                     {selectedFile && <p className="info-message">Выбран файл: {selectedFile.name}</p>}
                 </div>
-
-                
 
                 <div className="form-group">
                     <label htmlFor="publicationYear">Год публикации:</label>
@@ -185,6 +186,24 @@ const EditBookFormPage: React.FC = () => {
                         max={new Date().getFullYear()}
                         aria-label="Год публикации книги"
                     />
+                </div>
+
+                {/* НОВОЕ ПОЛЕ: Жанр */}
+                <div className="form-group">
+                    <label htmlFor="genre">Жанр:</label>
+                    <select
+                        id="genre"
+                        value={genre}
+                        onChange={(e) => setGenre(e.target.value as BookGenre)}
+                        required
+                        aria-label="Жанр книги"
+                    >
+                        {ALL_BOOK_GENRES.map((g) => (
+                            <option key={g} value={g}>
+                                {g}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
                 <div className="form-group options-group">
@@ -202,7 +221,7 @@ const EditBookFormPage: React.FC = () => {
                     </div>
 
                     {isForSale && (
-                         <div className="form-group nested-group">
+                        <div className="form-group nested-group">
                             <label htmlFor="priceValue">Цена (₽):</label>
                             <input
                                 type="number"
@@ -228,7 +247,9 @@ const EditBookFormPage: React.FC = () => {
                     </div>
                 </div>
 
-                <button type="submit" className="submit-button">Сохранить изменения</button>
+                <button type="submit" className="submit-button">
+                    Сохранить изменения
+                </button>
             </form>
         </div>
     );
